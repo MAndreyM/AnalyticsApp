@@ -1,0 +1,13 @@
+build/
+out/
+bin/
+lib/
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
