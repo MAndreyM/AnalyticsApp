@@ -41,11 +41,11 @@ jobs:
       run: |
         cd build
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          if [ -f "./bin/analytics_app.exe" ]; then
-            .\bin\analytics_app.exe --help
+          if [ -f "bin/analytics_app.exe" ]; then
+            ./bin/analytics_app.exe --help
           else
             echo "❌ Файл analytics_app.exe не найден!"
-            ls -la ./bin/ || echo "Директория bin не существует"
+            ls -la bin/ || echo "Директория bin не существует"
           fi
         else
           ./bin/analytics_app --help
