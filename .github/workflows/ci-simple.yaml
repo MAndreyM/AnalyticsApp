@@ -37,6 +37,7 @@ jobs:
         ninja
         
     - name: Test binary
+      shell: bash
       run: |
         cd build
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
