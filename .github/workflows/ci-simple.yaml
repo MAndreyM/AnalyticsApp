@@ -1,0 +1,50 @@
+name: CI - Simple Multi-Platform
+
+on:
+  push:
+    branches: [ develop, main, 'feature/**' ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build-test:
+    name: "Build on ${{ matrix.os }}"
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Linux dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build g++ git
+        
+    - name: Install Windows dependencies
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install ninja -y
+        
+    - name: Configure and build
+      run: |
+        mkdir build && cd build
+        cmake -G Ninja ..
+        ninja
+        
+    - name: Test binary
+      run: |
+        cd build
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          .\bin\analytics_app.exe --help
+        else
+          ./bin/analytics_app --help
+        fi
+        
+    - name: Build status
+      run: |
+        echo "✅ Build successful on ${{ matrix.os }}"
