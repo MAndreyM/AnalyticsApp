@@ -1,0 +1,56 @@
+name: CI - Feature Branches
+
+on:
+  push:
+    branches: [ 'feature/**' ]
+  pull_request:
+    branches: [ 'feature/**', 'develop' ]
+
+jobs:
+  feature-build:
+    name: "Feature Build - ${{ github.ref }}"
+    runs-on: ubuntu-latest
+    container:
+      image: registry.altlinux.org/alt/alt:latest
+    
+    steps:
+    - name: Extract branch info
+      id: branch-info
+      run: |
+        BRANCH_NAME="${{ github.ref }}"
+        echo "branch=${BRANCH_NAME#refs/heads/}" >> $GITHUB_OUTPUT
+        echo "is_feature=$(echo '$BRANCH_NAME' | grep -q 'feature/' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+        
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install -y cmake ninja-build g++ git
+        
+    - name: Build feature branch
+      run: |
+        mkdir build && cd build
+        # Включаем все фичи для тестирования в feature ветках
+        cmake -G Ninja -DENABLE_DEVELOPMENT_FEATURES=ON ..
+        ninja
+        
+    - name: Run basic tests
+      run: |
+        cd build
+        ./bin/analytics_app --help
+        
+    - name: Feature branch report
+      run: |
+        echo "🎯 Feature Branch Analysis"
+        echo "Branch: ${{ steps.branch-info.outputs.branch }}"
+        echo "Event: ${{ github.event_name }}"
+        echo "Actor: ${{ github.actor }}"
+        echo "Last commit: $(git log -1 --pretty=%B)"
+        
+    - name: Success notification
+      if: success()
+      run: |
+        echo "✅ Feature branch build successful!"
+        echo "Ready for PR review and merge to develop"

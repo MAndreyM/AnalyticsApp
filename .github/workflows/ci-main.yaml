@@ -1,0 +1,67 @@
+name: CI - Main Branch (Production)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  production-build:
+    name: "Production Build"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: 
+          - image: redos.red-soft.ru/redos/redos:latest
+            name: redos
+          - image: registry.altlinux.org/alt/alt:10
+            name: altlinux10
+    
+    container:
+      image: ${{ matrix.platform.image }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        if command -v dnf >/dev/null 2>&1; then
+          dnf install -y cmake ninja-build g++ git
+        else
+          apt-get update && apt-get install -y cmake ninja-build g++ git
+        fi
+        
+    - name: Production build (only stable features)
+      run: |
+        mkdir build && cd build
+        # Только стабильные фичи для production
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+        
+    - name: Run production tests
+      run: |
+        cd build
+        ./bin/analytics_app --help
+        
+    - name: Create production artifact
+      run: |
+        mkdir -p artifacts
+        cp build/bin/analytics_app artifacts/
+        cp README.md artifacts/
+        tar -czf analytics-app-${{ matrix.platform.name }}-production.tar.gz -C artifacts .
+        
+    - name: Upload production artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: analytics-app-${{ matrix.platform.name }}-${{ github.sha }}
+        path: analytics-app-${{ matrix.platform.name }}-production.tar.gz
+        retention-days: 30
+        
+    - name: Production readiness check
+      run: |
+        echo "🚀 Production Build Status"
+        echo "Platform: ${{ matrix.platform.name }}"
+        echo "Status: ✅ READY"
+        echo "SHA: ${{ github.sha }}"
