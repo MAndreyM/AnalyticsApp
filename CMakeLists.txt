@@ -34,7 +34,36 @@ install(TARGETS analytics_app
 
 enable_testing()
 
+# Doxygen documentation
 find_package(Doxygen)
+
 if(DOXYGEN_FOUND)
-    message(STATUS "Doxygen found - documentation available")
+    message(STATUS "Doxygen found - generating documentation target")
+    
+    set(DOXYGEN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs)
+    set(DOXYGEN_HTML_DIR ${DOXYGEN_OUTPUT_DIR}/html)
+    
+    # Configure Doxyfile
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/docs/Doxyfile
+        ${CMAKE_BINARY_DIR}/Doxyfile
+        @ONLY
+    )
+    
+    # Add documentation target
+    add_custom_target(docs
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+    )
+    
+    # Install documentation
+    install(
+        DIRECTORY ${DOXYGEN_HTML_DIR}
+        DESTINATION share/doc/analytics_app
+        COMPONENT documentation
+    )
+else()
+    message(WARNING "Doxygen not found - documentation target will not be available")
 endif()
