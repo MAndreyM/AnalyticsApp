@@ -24,18 +24,18 @@
 
 ```bash
 # RedOS CI образ
-docker pull mandreym/redos-ci-analytics:latest
+docker pull mandrm/redos-ci-analytics:latest
 
 # Alt Linux образы
-docker pull mandreym/altlinux-ci-analytics:latest
-docker pull mandreym/altlinux-ci-analytics:alt10
+docker pull mandrm/altlinux-ci-analytics:latest
+docker pull mandrm/altlinux-ci-analytics:alt10
 
 # Локальное тестирование на RedOS
-docker run --rm -v $(pwd):/workspace mandreym/redos-ci-analytics:latest \
+docker run --rm -v $(pwd):/workspace mandrm/redos-ci-analytics:latest \
   bash -c "mkdir build && cd build && cmake -G Ninja .. && ninja"
 
 # Локальное тестирование на Alt Linux
-docker run --rm -v $(pwd):/workspace mandreym/altlinux-ci-analytics:latest \
+docker run --rm -v $(pwd):/workspace mandrm/altlinux-ci-analytics:latest \
   bash -c "mkdir build && cd build && cmake -G Ninja .. && ninja"
 ```
 
