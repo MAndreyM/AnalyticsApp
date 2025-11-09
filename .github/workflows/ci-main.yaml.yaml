@@ -1,0 +1,133 @@
+name: CI - Main Platforms
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  redos-production:
+    name: "RedOS Production Build"
+    runs-on: ubuntu-latest
+    container:
+      image: mandrm/redos-ci-analytics:latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Production build on RedOS
+      run: |
+        echo "🔨 Production build on RedOS..."
+        mkdir build && cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+        
+    - name: Test production binary
+      run: |
+        cd build
+        ./bin/analytics_app --help
+        
+    - name: Create RedOS artifact
+      run: |
+        mkdir -p artifacts
+        cp build/bin/analytics_app artifacts/
+        tar -czf analytics-app-redos.tar.gz -C artifacts .
+
+  altlinux-latest-production:
+    name: "Alt Linux Latest Production Build"
+    runs-on: ubuntu-latest
+    container:
+      image: mandrm/altlinux-ci-analytics:latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Production build on Alt Linux Latest
+      run: |
+        echo "🔨 Production build on Alt Linux Latest..."
+        mkdir build && cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+        
+    - name: Test Alt Linux production binary
+      run: |
+        cd build
+        ./bin/analytics_app --help
+        
+    - name: Create Alt Linux Latest artifact
+      run: |
+        mkdir -p artifacts
+        cp build/bin/analytics_app artifacts/
+        tar -czf analytics-app-altlinux-latest.tar.gz -C artifacts .
+
+  altlinux-10-production:
+    name: "Alt Linux 10 Production Build"
+    runs-on: ubuntu-latest
+    container:
+      image: mandrm/altlinux-ci-analytics:alt10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Production build on Alt Linux 10
+      run: |
+        echo "🔨 Production build on Alt Linux 10..."
+        mkdir build && cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+        
+    - name: Test Alt Linux 10 production binary
+      run: |
+        cd build
+        ./bin/analytics_app --help
+        
+    - name: Create Alt Linux 10 artifact
+      run: |
+        mkdir -p artifacts
+        cp build/bin/analytics_app artifacts/
+        tar -czf analytics-app-altlinux-10.tar.gz -C artifacts .
+
+  windows-production:
+    name: "Windows Production Build"
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Production build on Windows
+      run: |
+        choco install ninja pkgconfiglite -y
+        mkdir build
+        cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+        
+    - name: Test Windows production binary
+      shell: cmd
+      run: |
+        cd build
+        .\bin\analytics_app.exe --help
+
+  compatibility-report:
+    name: "Production Compatibility Report"
+    runs-on: ubuntu-latest
+    needs: [redos-production, altlinux-latest-production, altlinux-10-production, windows-production]
+    
+    steps:
+    - name: Generate production report
+      run: |
+        echo "🏭 PRODUCTION CI REPORT"
+        echo "======================"
+        echo "Branch: ${{ github.ref }}"
+        echo "✅ RedOS: Production build successful"
+        echo "✅ Alt Linux Latest: Production build successful"
+        echo "✅ Alt Linux 10: Production build successful"
+        echo "✅ Windows: Production build successful"
+        echo ""
+        echo "📦 All target platforms supported"
+        echo "🚀 Ready for production deployment"
