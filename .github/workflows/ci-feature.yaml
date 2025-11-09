@@ -46,7 +46,7 @@ jobs:
       
     - name: Install dependencies
       run: |
-        choco install ninja -y
+        choco install ninja pkgconfiglite -y
         
     - name: Configure and build
       run: |
