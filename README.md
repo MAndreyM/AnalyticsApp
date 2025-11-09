@@ -88,6 +88,22 @@ Examples:
   ./analytics_app -v -o ./reports /path/to/data
 ```
 
+## Генерация документации
+
+### Требования
+- Doxygen 1.8.0 или выше
+- Graphviz (для диаграмм классов)
+
+### Генерация
+```bash
+# Сборка документации
+mkdir build && cd build
+cmake ..
+make docs
+
+# Документация будет доступна в build/docs/html/
+```
+
 ## 🔧 Для разработчиков
 
 ### Git Flow

@@ -36,12 +36,18 @@ enable_testing()
 
 # Doxygen documentation
 find_package(Doxygen)
-
 if(DOXYGEN_FOUND)
     message(STATUS "Doxygen found - generating documentation target")
     
     set(DOXYGEN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs)
     set(DOXYGEN_HTML_DIR ${DOXYGEN_OUTPUT_DIR}/html)
+    
+    # Копируем mainpage.md в билд директорию
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/docs/mainpage.md
+        ${CMAKE_BINARY_DIR}/mainpage.md
+        COPYONLY
+    )
     
     # Configure Doxyfile
     configure_file(
@@ -64,6 +70,10 @@ if(DOXYGEN_FOUND)
         DESTINATION share/doc/analytics_app
         COMPONENT documentation
     )
+    
+    # Сообщение о доступности документации
+    message(STATUS "Documentation target 'docs' available")
+    message(STATUS "Run 'make docs' to generate documentation")
 else()
     message(WARNING "Doxygen not found - documentation target will not be available")
 endif()
