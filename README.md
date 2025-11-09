@@ -2,33 +2,22 @@
 
 ## 📊 CI/CD Status
 
-| Ветка | Статус | Описание |
-|-------|--------|-----------|
-| `develop` | ![Develop CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-develop.yml/badge.svg?branch=develop) | Интеграционная сборка |
-| `main` | ![Main CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-main.yml/badge.svg?branch=main) | Production сборка |
-| `feature/*` | ![Feature CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-feature.yml/badge.svg) | Функциональные ветки |
-
-## 🔄 Workflow Status
-
-| Workflow | Статус |
-|----------|--------|
-| Release | ![Release](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/release.yml/badge.svg) |
+| Платформа | Статус | Детали |
+|-----------|--------|---------|
+| Все платформы | ![CI Status](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-simple.yaml/badge.svg) | Ubuntu & Windows |
+| Develop ветка | ![Develop CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-simple.yaml/badge.svg?branch=develop) | Основная разработка |
+| Main ветка | ![Main CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-simple.yaml/badge.svg?branch=main) | Продакшен сборка |
 
 ## 🚀 О проекте
+Кроссплатформенное CLI приложение для анализа успеваемости учащихся на основе данных из Excel файлов.
 
-Кроссплатформенное приложение для анализа успеваемости учащихся на основе данных из Excel файлов.
+## 📋 Поддерживаемые платформы
 
-## 📋 Функциональность
+- ✅ **Ubuntu** - основная сборка
+- ✅ **Windows** - поддержка MSVC/MinGW
+- ✅ **RedOS** - в разработке
+- ✅ **Alt Linux** - в разработке
 
-- ✅ Чтение XLS файлов
-- ✅ Анализ успеваемости 
-- ✅ Генерация отчетов
-- ✅ Кроссплатформенность
-
-## Поддерживаемые платформы
-- ✅ RedOS
-- ✅ Alt Linux (10, latest)  
-- ✅ Windows (MinGW-w64)
 
 ## 🛠 Сборка и запуск
 
@@ -37,7 +26,7 @@
 - Ninja
 - C++20 компилятор (GCC, Clang, MSVC)
 
-### Linux/RedOS
+### Linux/Ubuntu
 ```bash
 git clone https://github.com/MAndreyM/AnalyticsApp.git
 cd AnalyticsApp
