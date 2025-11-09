@@ -4,7 +4,7 @@
 
 | Ветка | Статус | Платформы |
 |-------|--------|-----------|
-| Feature Branches | ![Feature CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-feature.yaml/badge.svg) | RedOS & Windows |
+| Feature Branches | ![Feature CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-feature.yaml/badge.svg) | RedOS, Alt Linux, Windows |
 | Develop Branch | ![Develop CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-main.yaml/badge.svg?branch=develop) | Продакшен сборка |
 | Main Branch | ![Main CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-main.yaml/badge.svg?branch=main) | Стабильная версия |
 
@@ -14,8 +14,9 @@
 ## 📋 Поддерживаемые платформы
 
 - ✅ **RedOS** - основная целевая платформа
+- ✅ **Alt Linux Latest** - актуальная версия
+- ✅ **Alt Linux 10** - стабильная версия  
 - ✅ **Windows** - поддержка MSVC
-- 🔄 **Alt Linux** - в разработке
 
 ## 🐳 Используемые Docker образы
 
@@ -25,8 +26,16 @@
 # RedOS CI образ
 docker pull mandreym/redos-ci-analytics:latest
 
-# Локальное тестирование
+# Alt Linux образы
+docker pull mandreym/altlinux-ci-analytics:latest
+docker pull mandreym/altlinux-ci-analytics:alt10
+
+# Локальное тестирование на RedOS
 docker run --rm -v $(pwd):/workspace mandreym/redos-ci-analytics:latest \
+  bash -c "mkdir build && cd build && cmake -G Ninja .. && ninja"
+
+# Локальное тестирование на Alt Linux
+docker run --rm -v $(pwd):/workspace mandreym/altlinux-ci-analytics:latest \
   bash -c "mkdir build && cd build && cmake -G Ninja .. && ninja"
 ```
 
@@ -37,7 +46,7 @@ docker run --rm -v $(pwd):/workspace mandreym/redos-ci-analytics:latest \
 - Ninja
 - C++20 компилятор (GCC, Clang, MSVC)
 
-### RedOS
+### RedOS / Alt Linux
 
 ```bash
 git clone https://github.com/MAndreyM/AnalyticsApp.git

@@ -101,7 +101,7 @@ jobs:
       
     - name: Production build on Windows
       run: |
-        choco install ninja -y
+        choco install ninja pkgconfiglite -y
         mkdir build
         cd build
         cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
