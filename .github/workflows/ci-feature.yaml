@@ -1,0 +1,86 @@
+name: CI - Feature Branches
+
+on:
+  push:
+    branches: [ 'feature/**' ]
+  pull_request:
+    branches: [ 'feature/**', 'develop' ]
+
+jobs:
+  redos-build:
+    name: "Build on RedOS"
+    runs-on: ubuntu-latest
+    container:
+      image: mandrm/redos-ci-analytics:latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Build on RedOS
+      run: |
+        echo "🔨 Building on RedOS..."
+        mkdir build && cd build
+        cmake -G Ninja ..
+        ninja
+        
+    - name: Test binary on RedOS
+      run: |
+        cd build
+        ./bin/analytics_app --help
+        
+    - name: RedOS environment info
+      run: |
+        echo "✅ RedOS Environment:"
+        cat /etc/os-release | grep -E "^(NAME|VERSION)="
+        echo "Compiler: $(g++ --version | head -1)"
+        echo "CMake: $(cmake --version | head -1)"
+
+  windows-build:
+    name: "Build on Windows"
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        choco install ninja -y
+        
+    - name: Configure and build
+      run: |
+        mkdir build
+        cd build
+        cmake -G Ninja ..
+        ninja
+        
+    - name: Test binary on Windows
+      shell: cmd
+      run: |
+        cd build
+        .\bin\analytics_app.exe --help
+        
+    - name: Windows build status
+      run: |
+        echo "✅ Build successful on Windows"
+
+  feature-branch-report:
+    name: "Feature Branch Report"
+    runs-on: ubuntu-latest
+    needs: [redos-build, windows-build]
+    
+    steps:
+    - name: Generate feature report
+      run: |
+        echo "🎯 FEATURE BRANCH CI REPORT"
+        echo "==========================="
+        echo "Branch: ${{ github.ref }}"
+        echo "Event: ${{ github.event_name }}"
+        echo "SHA: ${{ github.sha }}"
+        echo ""
+        echo "📋 Platform Status:"
+        echo "✅ RedOS: Build successful"
+        echo "✅ Windows: Build successful"
+        echo ""
+        echo "🚀 Ready for PR review and merge to develop"

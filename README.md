@@ -2,22 +2,33 @@
 
 ## 📊 CI/CD Status
 
-| Платформа | Статус | Детали |
-|-----------|--------|---------|
-| Все платформы | ![CI Status](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-simple.yaml/badge.svg) | Ubuntu & Windows |
-| Develop ветка | ![Develop CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-simple.yaml/badge.svg?branch=develop) | Основная разработка |
-| Main ветка | ![Main CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-simple.yaml/badge.svg?branch=main) | Продакшен сборка |
+| Ветка | Статус | Платформы |
+|-------|--------|-----------|
+| Feature Branches | ![Feature CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-feature.yaml/badge.svg) | RedOS & Windows |
+| Develop Branch | ![Develop CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-main.yaml/badge.svg?branch=develop) | Продакшен сборка |
+| Main Branch | ![Main CI](https://github.com/MAndreyM/AnalyticsApp/actions/workflows/ci-main.yaml/badge.svg?branch=main) | Стабильная версия |
 
 ## 🚀 О проекте
 Кроссплатформенное CLI приложение для анализа успеваемости учащихся на основе данных из Excel файлов.
 
 ## 📋 Поддерживаемые платформы
 
-- ✅ **Ubuntu** - основная сборка
-- ✅ **Windows** - поддержка MSVC/MinGW
-- ✅ **RedOS** - в разработке
-- ✅ **Alt Linux** - в разработке
+- ✅ **RedOS** - основная целевая платформа
+- ✅ **Windows** - поддержка MSVC
+- 🔄 **Alt Linux** - в разработке
 
+## 🐳 Используемые Docker образы
+
+Для CI/CD используются предварительно собранные Docker образы:
+
+```bash
+# RedOS CI образ
+docker pull mandreym/redos-ci-analytics:latest
+
+# Локальное тестирование
+docker run --rm -v $(pwd):/workspace mandreym/redos-ci-analytics:latest \
+  bash -c "mkdir build && cd build && cmake -G Ninja .. && ninja"
+```
 
 ## 🛠 Сборка и запуск
 
@@ -26,7 +37,8 @@
 - Ninja
 - C++20 компилятор (GCC, Clang, MSVC)
 
-### Linux/Ubuntu
+### RedOS
+
 ```bash
 git clone https://github.com/MAndreyM/AnalyticsApp.git
 cd AnalyticsApp
@@ -71,10 +83,9 @@ Examples:
 
 ### Git Flow
 
-- main - стабильные версии
-- develop - текущая разработка
-- feature/* - новые функции
-- hotfix/* - срочные исправления
+- `feature/*` → CI: RedOS + Windows (ci-feature.yaml)
+- `develop` → CI: Продакшен сборка (ci-main.yaml)
+- `main` → CI: Стабильная версия (ci-main.yaml)
 
 ### Коммиты
 
