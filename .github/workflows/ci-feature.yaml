@@ -118,7 +118,7 @@ jobs:
         echo "✅ Alt Linux 10 Environment:"
         cat /etc/os-release | grep -E "^(NAME|VERSION)="
 
-    windows-build:
+  windows-build:
     name: "Build on Windows"
     runs-on: windows-latest
     
@@ -164,6 +164,7 @@ jobs:
       run: |
         cd build
         bin\analytics_app.exe --help
+
   feature-branch-report:
     name: "Feature Branch Report"
     runs-on: ubuntu-latest
