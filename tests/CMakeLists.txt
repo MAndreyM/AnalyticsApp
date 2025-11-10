@@ -11,10 +11,31 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/doctest/doctest.git
     GIT_TAG v2.4.11
 )
-FetchContent_MakeAvailable(doctest)
+
+## Получаем контент без автоматического add_subdirectory()
+FetchContent_GetProperties(doctest)
+if(NOT doctest_POPULATED)
+    FetchContent_Populate(doctest)
+    # Создаем интерфейсную библиотеку вместо использования их CMakeLists.txt
+    add_library(doctest INTERFACE)
+    target_include_directories(doctest INTERFACE ${doctest_SOURCE_DIR})
+    target_compile_definitions(doctest INTERFACE DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)
+endif()
+
+# FetchContent_MakeAvailable(doctest)
+
+# Получить контент без автоматической настройки
+#FetchContent_GetProperties(doctest)
+#if(NOT doctest_POPULATED)
+#    FetchContent_Populate(doctest)
+    # Добавляем doctest как интерфейсную библиотеку (header-only)
+#    add_library(doctest INTERFACE)
+#    target_include_directories(doctest INTERFACE ${doctest_SOURCE_DIR})
+#    target_compile_definitions(doctest INTERFACE DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)
+#endif()
 
 # Для doctest нужно определить макрос, так как это header-only библиотека
-target_compile_definitions(doctest INTERFACE DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)
+# target_compile_definitions(doctest INTERFACE DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)
 
 # Тесты для моделей данных
 add_executable(test_datamodels test_datamodels.cpp)
