@@ -13,28 +13,40 @@ if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
 endif()
 
+# Глобальные флаги компиляции
 if(MSVC)
     add_compile_options(/W4 /permissive-)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
+# Выходные директории
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# Поиск зависимостей
 find_package(PkgConfig REQUIRED)
 
-add_executable(analytics_app src/main.cpp)
+# ============================================================================
+# ПОДКЛЮЧЕНИЕ ИСХОДНЫХ КОДОВ
+# ============================================================================
 
-install(TARGETS analytics_app
-    RUNTIME DESTINATION bin
-    COMPONENT applications
-)
+add_subdirectory(src)
+
+# ============================================================================
+# ТЕСТИРОВАНИЕ
+# ============================================================================
 
 enable_testing()
 
-# Doxygen documentation
+# Будет добавлено в следующих коммитах:
+# add_subdirectory(tests)
+
+# ============================================================================
+# ДОКУМЕНТАЦИЯ
+# ============================================================================
+
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
     message(STATUS "Doxygen found - generating documentation target")
@@ -42,21 +54,12 @@ if(DOXYGEN_FOUND)
     set(DOXYGEN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs)
     set(DOXYGEN_HTML_DIR ${DOXYGEN_OUTPUT_DIR}/html)
     
-    # Копируем mainpage.md в билд директорию
-    configure_file(
-        ${CMAKE_SOURCE_DIR}/docs/mainpage.md
-        ${CMAKE_BINARY_DIR}/mainpage.md
-        COPYONLY
-    )
-    
-    # Configure Doxyfile
     configure_file(
         ${CMAKE_SOURCE_DIR}/docs/Doxyfile
         ${CMAKE_BINARY_DIR}/Doxyfile
         @ONLY
     )
     
-    # Add documentation target
     add_custom_target(docs
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -64,16 +67,36 @@ if(DOXYGEN_FOUND)
         VERBATIM
     )
     
-    # Install documentation
     install(
         DIRECTORY ${DOXYGEN_HTML_DIR}
         DESTINATION share/doc/analytics_app
         COMPONENT documentation
     )
     
-    # Сообщение о доступности документации
-    message(STATUS "Documentation target 'docs' available")
-    message(STATUS "Run 'make docs' to generate documentation")
 else()
     message(WARNING "Doxygen not found - documentation target will not be available")
 endif()
+
+# ============================================================================
+# УСТАНОВКА
+# ============================================================================
+
+install(TARGETS analytics_app
+    RUNTIME DESTINATION bin
+    COMPONENT applications
+)
+
+# ============================================================================
+# ИНФОРМАЦИЯ О ПРОЕКТЕ
+# ============================================================================
+
+message(STATUS "AnalyticsApp Configuration Complete")
+message(STATUS "  Version: ${PROJECT_VERSION}")
+message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "")
+message(STATUS "Project Structure:")
+message(STATUS "  src/DataProcessor/ - Модуль обработки данных")
+message(STATUS "  src/FileProcessor/ - Модуль работы с файлами (будущий)")
+message(STATUS "  src/Utils/ - Вспомогательные утилиты (будущий)")
