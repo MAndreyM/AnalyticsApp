@@ -5,9 +5,7 @@
 # Библиотека обработки данных
 add_library(DataProcessor
     DataModels.cpp
-    # В будущем добавим:
-    # GradeCalculator.cpp
-    # StudentAnalyzer.cpp
+    GradeCalculator.cpp  # ← ДОБАВЛЕНО
 )
 
 # Публичные include директории
@@ -23,3 +21,8 @@ if(MSVC)
 else()
     target_compile_options(DataProcessor PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+# Информация о модуле
+message(STATUS "DataProcessor module configured")
+message(STATUS "  Sources: DataModels.cpp, GradeCalculator.cpp")
+message(STATUS "  Headers: DataModels.h, GradeCalculator.h")
