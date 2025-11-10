@@ -191,19 +191,19 @@ TEST_CASE("Test scenario 4: Class with single three and zero score") {
     GradeCalculator calculator;
     
     std::vector<Student> students = {
-        // Одна тройка + нулевой балл
+        // Одна тройка + нулевой балл (Математика 3.4 → 3)
         createTestStudent("Белов Артем Юрьевич", {
             {"Математика", 3.4}, {"Физика", 0.0}, {"Химия", 4.5}, {"Литература", 4.2}
         }),
-        // Только нулевой балл
+        // Только нулевой балл (нет троек)
         createTestStudent("Ковалева Юлия Андреевна", {
             {"Математика", 4.5}, {"Физика", 4.2}, {"Химия", 0.0}, {"Литература", 4.0}
         }),
-        // Одна тройка
+        // Одна тройка (Физика 3.59 → 3) ← ИСПРАВЛЕНО: была физика 3.6 → 4
         createTestStudent("Орлов Максим Сергеевич", {
-            {"Математика", 4.5}, {"Физика", 3.6}, {"Химия", 4.9}, {"Литература", 4.7}
+            {"Математика", 4.5}, {"Физика", 3.59}, {"Химия", 4.9}, {"Литература", 4.7}
         }),
-        // Одна тройка + нулевой балл
+        // Одна тройка + нулевой балл (Математика 3.5 → 3)
         createTestStudent("Зайцева Ольга Викторовна", {
             {"Математика", 3.5}, {"Физика", 4.2}, {"Химия", 0.0}, {"Литература", 4.8}
         }),
@@ -233,6 +233,15 @@ TEST_CASE("Test scenario 4: Class with single three and zero score") {
         CHECK(belovInSingleThree == true);
         CHECK(belovInZeroScore == true);
         
+        // Орлов должен быть только в single three
+        bool orlovInSingleThree = std::any_of(singleThree.begin(), singleThree.end(),
+            [](const auto& pair) { return pair.second.getFullName() == "Орлов Максим Сергеевич"; });
+        bool orlovInZeroScore = std::any_of(zeroScore.begin(), zeroScore.end(),
+            [](const auto& pair) { return pair.second.getFullName() == "Орлов Максим Сергеевич"; });
+            
+        CHECK(orlovInSingleThree == true);
+        CHECK(orlovInZeroScore == false);
+        
         // Зайцева должна быть в обоих списках
         bool zaitsevaInSingleThree = std::any_of(singleThree.begin(), singleThree.end(),
             [](const auto& pair) { return pair.second.getFullName() == "Зайцева Ольга Викторовна"; });
@@ -241,6 +250,15 @@ TEST_CASE("Test scenario 4: Class with single three and zero score") {
             
         CHECK(zaitsevaInSingleThree == true);
         CHECK(zaitsevaInZeroScore == true);
+        
+        // Ковалева должна быть только в zero score
+        bool kovalevaInSingleThree = std::any_of(singleThree.begin(), singleThree.end(),
+            [](const auto& pair) { return pair.second.getFullName() == "Ковалева Юлия Андреевна"; });
+        bool kovalevaInZeroScore = std::any_of(zeroScore.begin(), zeroScore.end(),
+            [](const auto& pair) { return pair.second.getFullName() == "Ковалева Юлия Андреевна"; });
+            
+        CHECK(kovalevaInSingleThree == false);
+        CHECK(kovalevaInZeroScore == true);
     }
     
     SUBCASE("student with multiple threes not in single three list") {
@@ -248,5 +266,67 @@ TEST_CASE("Test scenario 4: Class with single three and zero score") {
         bool hasMorozov = std::any_of(singleThree.begin(), singleThree.end(),
             [](const auto& pair) { return pair.second.getFullName() == "Морозов Александр Игоревич"; });
         CHECK(hasMorozov == false);
+    }
+    
+    SUBCASE("verify specific students in results") {
+        const auto& singleThree = result.getStudentsWithSingleThree();
+        const auto& zeroScore = result.getStudentsWithZeroScore();
+        
+        // Проверяем конкретных студентов
+        std::vector<std::string> expectedSingleThree = {
+            "Белов Артем Юрьевич",
+            "Орлов Максим Сергеевич", 
+            "Зайцева Ольга Викторовна"
+        };
+        
+        std::vector<std::string> expectedZeroScore = {
+            "Белов Артем Юрьевич",
+            "Ковалева Юлия Андреевна",
+            "Зайцева Ольга Викторовна"
+        };
+        
+        for (const auto& name : expectedSingleThree) {
+            bool found = std::any_of(singleThree.begin(), singleThree.end(),
+                [&name](const auto& pair) { return pair.second.getFullName() == name; });
+            CHECK(found == true);
+        }
+        
+        for (const auto& name : expectedZeroScore) {
+            bool found = std::any_of(zeroScore.begin(), zeroScore.end(),
+                [&name](const auto& pair) { return pair.second.getFullName() == name; });
+            CHECK(found == true);
+        }
+    }
+}
+
+TEST_CASE("Debug: Verify scenario 4 calculations") {
+    GradeCalculator calculator;
+    
+    SUBCASE("check individual student calculations") {
+        Student belov = createTestStudent("Белов Артем", {
+            {"Математика", 3.4}, {"Физика", 0.0}, {"Химия", 4.5}
+        });
+        
+        Student orlov = createTestStudent("Орлов Максим", {
+            {"Математика", 4.5}, {"Физика", 3.59}, {"Химия", 4.9}
+        });
+        
+        Student zaitseva = createTestStudent("Зайцева Ольга", {
+            {"Математика", 3.5}, {"Физика", 4.2}, {"Химия", 0.0}
+        });
+        
+        CHECK(calculator.hasSingleThree(belov) == true);
+        CHECK(calculator.hasZeroScore(belov) == true);
+        
+        CHECK(calculator.hasSingleThree(orlov) == true);
+        CHECK(calculator.hasZeroScore(orlov) == false);
+        
+        CHECK(calculator.hasSingleThree(zaitseva) == true);
+        CHECK(calculator.hasZeroScore(zaitseva) == true);
+        
+        // Проверяем конкретные оценки
+        CHECK(calculator.calculateGrade(3.4) == 3);   // Белов: Математика
+        CHECK(calculator.calculateGrade(3.59) == 3);  // Орлов: Физика
+        CHECK(calculator.calculateGrade(3.5) == 3);   // Зайцева: Математика
     }
 }
