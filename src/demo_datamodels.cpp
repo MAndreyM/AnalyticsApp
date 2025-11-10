@@ -1,8 +1,20 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include "DataModels.h"
-#include "GradeCalculator.h"
+#include "DataProcessor/DataModels.h"
+#include "DataProcessor/GradeCalculator.h"
+
+/**
+ * @brief Вспомогательная функция для создания студента с предметами
+ */
+Student createStudent(const std::string& className, const std::string& fullName, 
+                     const std::vector<std::pair<std::string, double>>& subjects) {
+    Student student(className, fullName);
+    for (const auto& [subject, score] : subjects) {
+        student.addSubjectScore(subject, score);
+    }
+    return student;
+}
 
 /**
  * @brief Создает тестовые данные для всех сценариев
@@ -33,7 +45,7 @@ std::vector<std::pair<std::string, std::vector<Student>>> createTestScenarios() 
             {"Математика", 3.2}, {"Физика", 3.5}, {"Химия", 4.5}, {"Литература", 4.0}
         }),
         createStudent("10B", "Федорова Мария Александровна", {
-            {"Математика", 4.5}, {"Физика", 3.6}, {"Химия", 4.9}, {"Литература", 4.7}
+            {"Математика", 4.5}, {"Физика", 3.59}, {"Химия", 4.9}, {"Литература", 4.7}
         }),
         createStudent("10B", "Николаев Андрей Викторович", {
             {"Математика", 4.8}, {"Физика", 4.2}, {"Химия", 4.5}, {"Литература", 4.9}
@@ -67,7 +79,7 @@ std::vector<std::pair<std::string, std::vector<Student>>> createTestScenarios() 
             {"Математика", 4.5}, {"Физика", 4.2}, {"Химия", 0.0}, {"Литература", 4.0}
         }),
         createStudent("10D", "Орлов Максим Сергеевич", {
-            {"Математика", 4.5}, {"Физика", 3.6}, {"Химия", 4.9}, {"Литература", 4.7}
+            {"Математика", 4.5}, {"Физика", 3.59}, {"Химия", 4.9}, {"Литература", 4.7}
         }),
         createStudent("10D", "Зайцева Ольга Викторовна", {
             {"Математика", 3.5}, {"Физика", 4.2}, {"Химия", 0.0}, {"Литература", 4.8}
