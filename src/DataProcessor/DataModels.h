@@ -53,6 +53,7 @@ public:
     void setClassName(const std::string& className);
     void setFullName(const std::string& fullName);
     void addSubjectScore(const std::string& subject, double score);
+    void setSubjectGrade(const std::string& subject, int grade);  // ← ДОБАВЛЕНО
     void setAverageScore(double score);
     void setRating(int rating);
     

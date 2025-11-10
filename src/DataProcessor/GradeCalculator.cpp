@@ -24,8 +24,7 @@ int GradeCalculator::calculateGrade(double averageScore) const {
 void GradeCalculator::calculateAllGrades(Student& student) const {
     for (const auto& [subject, score] : student.getSubjectScores()) {
         int grade = calculateGrade(score);
-        // Для демонстрации сохраняем оценки в отдельной структуре
-        // В реальной реализации нужно добавить метод setSubjectGrade в Student
+        student.setSubjectGrade(subject, grade);  // ← ИСПОЛЬЗУЕМ НОВЫЙ МЕТОД
     }
 }
 

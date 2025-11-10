@@ -69,3 +69,25 @@ TEST_CASE("AnalysisResult functionality") {
         CHECK(result.countStudentsWithZeroScore() == 0);
     }
 }
+
+TEST_CASE("Student subject grades functionality") {
+    Student student("10A", "Иванов Иван Иванович");
+    
+    SUBCASE("set and get subject grades") {
+        student.addSubjectScore("Математика", 4.5);
+        student.setSubjectGrade("Математика", 5);
+        
+        CHECK(student.getSubjectGrade("Математика") == 5);
+        CHECK(student.hasSubject("Математика") == true);
+    }
+    
+    SUBCASE("grade validation") {
+        CHECK_THROWS_AS(student.setSubjectGrade("", 4), DataValidationException);
+        CHECK_THROWS_AS(student.setSubjectGrade("Физика", 1), DataValidationException);
+        CHECK_THROWS_AS(student.setSubjectGrade("Физика", 6), DataValidationException);
+    }
+    
+    SUBCASE("get non-existent grade throws exception") {
+        CHECK_THROWS_AS(student.getSubjectGrade("Несуществующий предмет"), DataValidationException);
+    }
+}

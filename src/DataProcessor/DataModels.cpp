@@ -22,6 +22,17 @@ void Student::validateData() const {
             throw DataValidationException("Subject name cannot be empty");
         }
     }
+    
+    // Валидация оценок ← ДОБАВЛЕНО
+    for (const auto& [subject, grade] : subjectGrades_) {
+        if (grade < 2 || grade > 5) {
+            throw DataValidationException("Subject grade must be between 2 and 5");
+        }
+        
+        if (subject.empty()) {
+            throw DataValidationException("Subject name cannot be empty");
+        }
+    }
 }
 
 Student::Student(const std::string& className, const std::string& fullName) 
@@ -60,6 +71,19 @@ void Student::addSubjectScore(const std::string& subject, double score) {
     }
     
     subjectScores_[subject] = score;
+}
+
+// ДОБАВЛЕННЫЙ МЕТОД ↓
+void Student::setSubjectGrade(const std::string& subject, int grade) {
+    if (subject.empty()) {
+        throw DataValidationException("Subject name cannot be empty");
+    }
+    
+    if (grade < 2 || grade > 5) {
+        throw DataValidationException("Grade must be between 2 and 5");
+    }
+    
+    subjectGrades_[subject] = grade;
 }
 
 void Student::setAverageScore(double score) {
