@@ -9,12 +9,18 @@ add_executable(analytics_app main.cpp)
 add_subdirectory(DataProcessor)
 # В будущем добавим:
 # add_subdirectory(FileProcessor)
-# add_subdirectory(Utils)
+add_subdirectory(Utils)
 
 # Линкуем основные библиотеки
-target_link_libraries(analytics_app DataProcessor)
+target_link_libraries(analytics_app DataProcessor Utils)
 
-# Настройка выходных директорий
-set_target_properties(analytics_app PROPERTIES
+set_target_properties(
+    analytics_app
+    #demo_datamodels
+    PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+
+# Информация о приложениях
+message(STATUS "Applications configured:")
+message(STATUS "  analytics_app - Main application")

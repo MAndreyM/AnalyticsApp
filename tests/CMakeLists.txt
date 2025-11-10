@@ -24,10 +24,16 @@ add_executable(test_gradecalculator test_gradecalculator.cpp)
 target_link_libraries(test_gradecalculator DataProcessor doctest)
 target_include_directories(test_gradecalculator PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
+# Тесты для утилит файловой системы ← ДОБАВЛЕНО
+add_executable(test_filesystem test_filesystem.cpp)
+target_link_libraries(test_filesystem DataProcessor Utils doctest)  # ← ОБНОВЛЕНО
+target_include_directories(test_filesystem PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
 # Настройка выходных директорий
 set_target_properties(
     test_datamodels 
     test_gradecalculator
+    test_filesystem
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
@@ -35,13 +41,19 @@ set_target_properties(
 # Добавляем тесты в CTest
 add_test(NAME DataModelsTests COMMAND test_datamodels)
 add_test(NAME GradeCalculatorTests COMMAND test_gradecalculator)
+add_test(NAME FileSystemTests COMMAND test_filesystem)
 
 # Группируем тесты
 set_tests_properties(
     DataModelsTests 
     GradeCalculatorTests
+    FileSystemTests
     PROPERTIES 
     LABELS "unit_tests"
 )
 
+# Информация о тестах
 message(STATUS "Testing configuration complete")
+message(STATUS "  test_datamodels - Data models unit tests")
+message(STATUS "  test_gradecalculator - Grade calculator unit tests (4 scenarios)")
+message(STATUS "  test_filesystem - File system utilities tests")  # ← ДОБАВЛЕНО

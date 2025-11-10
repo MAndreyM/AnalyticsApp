@@ -20,6 +20,19 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
+# Линковка с std::filesystem ← ДОБАВЛЕНО
+if(MSVC)
+    # MSVC автоматически линкует std::filesystem
+else()
+    # Для GCC и Clang нужно явно указать линковку
+    find_library(STD_FILESYSTEM_LIB stdc++fs)
+    if(STD_FILESYSTEM_LIB)
+        message(STATUS "Found std::filesystem library: ${STD_FILESYSTEM_LIB}")
+    else()
+        message(STATUS "std::filesystem will be linked automatically")
+    endif()
+endif()
+
 # Выходные директории
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -39,8 +52,6 @@ add_subdirectory(src)
 # ============================================================================
 
 enable_testing()
-
-# Подключаем тесты
 add_subdirectory(tests)
 
 # ============================================================================
@@ -90,13 +101,27 @@ install(TARGETS analytics_app
 # ИНФОРМАЦИЯ О ПРОЕКТЕ
 # ============================================================================
 
-message(STATUS "AnalyticsApp Configuration Complete")
-message(STATUS "  Version: ${PROJECT_VERSION}")
-message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
-message(STATUS "Project Structure:")
-message(STATUS "  src/DataProcessor/ - Модуль обработки данных")
-message(STATUS "  src/FileProcessor/ - Модуль работы с файлами (будущий)")
-message(STATUS "  src/Utils/ - Вспомогательные утилиты (будущий)")
+message(STATUS "🎯 AnalyticsApp Phase 2 Configuration Complete")
+message(STATUS "   Version: ${PROJECT_VERSION}")
+message(STATUS "   C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "   Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "")
+message(STATUS "📦 Available Targets:")
+message(STATUS "   analytics_app    - Main application")
+#message(STATUS "   demo_datamodels  - Data models demonstration")
+#message(STATUS "   test_datamodels  - Data models unit tests")
+message(STATUS "   test_gradecalculator - Grade calculator tests (4 scenarios)")
+message(STATUS "   docs             - Generate documentation")
+message(STATUS "")
+message(STATUS "🏗️  Project Structure:")
+message(STATUS "   src/DataProcessor/ - Data models and analysis logic")
+message(STATUS "   src/Utils/         - File system utilities")  # ← ОБНОВЛЕНО
+message(STATUS "   tests/             - Unit tests and test scenarios")
+message(STATUS "")
+message(STATUS "🚀 Phase 2 Features:")
+message(STATUS "   ✅ Data models with validation")
+message(STATUS "   ✅ Grade calculator with rounding logic")
+message(STATUS "   ✅ 4 comprehensive test scenarios")
+message(STATUS "   ✅ File system utilities")  # ← ДОБАВЛЕНО
+#message(STATUS "   ✅ Demonstration program")
