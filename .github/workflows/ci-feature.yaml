@@ -135,8 +135,10 @@ jobs:
       run: |
         mkdir build
         cd build
+        # Установите переменные окружения для pkg-config
+        $env:PKG_CONFIG_EXECUTABLE = "C:\msys64\usr\bin\pkg-config.exe"
         $env:PATH = "C:\msys64\usr\bin;" + $env:PATH
-        cmake -G Ninja ..
+        cmake -G Ninja -DPKG_CONFIG_EXECUTABLE="C:\msys64\usr\bin\pkg-config.exe" ..
         ninja
         
     - name: Run Phase 2 verification
