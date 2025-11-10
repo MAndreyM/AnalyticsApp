@@ -24,17 +24,22 @@ int GradeCalculator::calculateGrade(double averageScore) const {
 void GradeCalculator::calculateAllGrades(Student& student) const {
     for (const auto& [subject, score] : student.getSubjectScores()) {
         int grade = calculateGrade(score);
-        student.setSubjectGrade(subject, grade);  // ← ИСПОЛЬЗУЕМ НОВЫЙ МЕТОД
+        student.setSubjectGrade(subject, grade);
     }
 }
 
 bool GradeCalculator::hasSingleThree(const Student& student) const {
     int threeCount = 0;
     
+    // Сначала рассчитываем оценки для всех предметов
     for (const auto& [subject, score] : student.getSubjectScores()) {
         int grade = calculateGrade(score);
         if (grade == 3) {
             threeCount++;
+        }
+        // Если уже больше одной тройки, можно выходить раньше
+        if (threeCount > 1) {
+            return false;
         }
     }
     
@@ -57,17 +62,21 @@ AnalysisResult GradeCalculator::analyzeStudents(const std::vector<Student>& stud
         // Проверяем критерий одной тройки
         if (hasSingleThree(student)) {
             // Находим предмет с тройкой
+            std::string threeSubject;
             for (const auto& [subject, score] : student.getSubjectScores()) {
                 if (calculateGrade(score) == 3) {
-                    result.addStudentWithSingleThree(subject, student);
-                    break;
+                    threeSubject = subject;
+                    break; // Нашли первую тройку - выходим
                 }
+            }
+            if (!threeSubject.empty()) {
+                result.addStudentWithSingleThree(threeSubject, student);
             }
         }
         
         // Проверяем критерий нулевого балла
         if (hasZeroScore(student)) {
-            // Находим предметы с нулевым баллом
+            // Находим все предметы с нулевым баллом
             for (const auto& [subject, score] : student.getSubjectScores()) {
                 if (score == 0.0) {
                     result.addStudentWithZeroScore(subject, student);
