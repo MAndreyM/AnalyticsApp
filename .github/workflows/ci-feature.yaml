@@ -132,6 +132,7 @@ jobs:
         git clone https://github.com/Microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg integrate install
+        .\vcpkg\vcpkg install pkg-config
         echo "VCPKG_ROOT=$pwd\vcpkg" | Out-File -FilePath $env:GITHUB_PATH -Append
         
     - name: Configure and build
