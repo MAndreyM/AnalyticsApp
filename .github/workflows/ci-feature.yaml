@@ -129,13 +129,13 @@ jobs:
     - name: Install dependencies
       run: |
         choco install ninja msys2 -y
-        refreshenv
-        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm --needed pkg-config mingw-w64-x86_64-gcc cmake
-        
+        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm --needed pkg-config mingw-w64-x86_64-gcc
+      
     - name: Configure and build
       run: |
         mkdir build
         cd build
+        $env:PATH = "C:\msys64\usr\bin;" + $env:PATH
         cmake -G Ninja ..
         ninja
         
