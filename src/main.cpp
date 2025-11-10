@@ -6,6 +6,8 @@
  * @date 2024
  */
 
+#include "DataProcessor/DataModels.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
