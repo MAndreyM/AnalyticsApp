@@ -43,8 +43,8 @@ print_status $? "FileSystem tests"
 echo -e "${YELLOW}[5/6] Testing demo program format...${NC}"
 DEMO_OUTPUT=$(./bin/demo_datamodels)
 
-# Исправленная проверка формата - используем fgrep вместо grep с опциями
-if echo "$DEMO_OUTPUT" | fgrep -q "------"; then
+# Исправленная проверка формата - используем простой bash pattern matching
+if [[ "$DEMO_OUTPUT" == *"------"* ]]; then
     echo -e "${GREEN}✅ Format check: PASSED (found separator lines)${NC}"
 else
     echo -e "${RED}❌ Format check: FAILED (no separator lines found)${NC}"
@@ -53,11 +53,18 @@ else
     exit 1
 fi
 
-# Дополнительная проверка на наличие данных
-if echo "$DEMO_OUTPUT" | fgrep -q " <-> "; then
+# Проверка на наличие данных в формате "предмет <-> ФИО"
+if [[ "$DEMO_OUTPUT" == *" <-> "* ]]; then
     echo -e "${GREEN}✅ Data format: PASSED (found data lines)${NC}"
 else
     echo -e "${YELLOW}⚠️  Data format: No data found (might be empty results)${NC}"
+fi
+
+# Дополнительная проверка на наличие классов
+if [[ "$DEMO_OUTPUT" == *"10A"* ]] || [[ "$DEMO_OUTPUT" == *"10B"* ]] || [[ "$DEMO_OUTPUT" == *"10C"* ]] || [[ "$DEMO_OUTPUT" == *"10D"* ]]; then
+    echo -e "${GREEN}✅ Class data: PASSED (found class information)${NC}"
+else
+    echo -e "${YELLOW}⚠️  Class data: No class information found${NC}"
 fi
 
 echo -e "${YELLOW}[6/6] Testing main application...${NC}"
