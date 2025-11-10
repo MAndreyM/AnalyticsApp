@@ -2,6 +2,8 @@
 # ТЕСТИРОВАНИЕ
 # ============================================================================
 
+message(STATUS "Configuring tests...")
+
 # Простой способ для header-only библиотеки
 include(FetchContent)
 FetchContent_Declare(
@@ -53,7 +55,6 @@ set_tests_properties(
 )
 
 # Информация о тестах
-message(STATUS "Testing configuration complete")
-message(STATUS "  test_datamodels - Data models unit tests")
-message(STATUS "  test_gradecalculator - Grade calculator unit tests (4 scenarios)")
-message(STATUS "  test_filesystem - File system utilities tests")  # ← ДОБАВЛЕНО
+message(STATUS "  test_datamodels      - Data models unit tests")
+message(STATUS "  test_gradecalculator - Grade calculator (4 scenarios)")
+message(STATUS "  test_filesystem      - File system utilities")

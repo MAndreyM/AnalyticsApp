@@ -2,6 +2,8 @@
 # UTILS MODULE
 # ============================================================================
 
+message(STATUS "Configuring Utils module...")
+
 # Библиотека утилит
 add_library(Utils
     FileSystemUtils.cpp
@@ -22,7 +24,7 @@ else()
 endif()
 
 # Информация о модуле
-message(STATUS "Utils module configured")
-message(STATUS "  Sources: FileSystemUtils.cpp")
-message(STATUS "  Headers: FileSystemUtils.h")
-message(STATUS "  Dependencies: std::filesystem")
+message(STATUS "  Utils            - File system utilities") 
+message(STATUS "    Sources: FileSystemUtils.cpp")
+message(STATUS "    Headers: FileSystemUtils.h")
+message(STATUS "    Dependencies: std::filesystem")

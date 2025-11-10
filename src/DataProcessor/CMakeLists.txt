@@ -2,6 +2,8 @@
 # DataProcessor MODULE
 # ============================================================================
 
+message(STATUS "Configuring DataProcessor module...")
+
 # Библиотека обработки данных
 add_library(DataProcessor
     DataModels.cpp
