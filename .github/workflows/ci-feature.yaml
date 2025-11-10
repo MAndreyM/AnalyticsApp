@@ -129,16 +129,14 @@ jobs:
     - name: Install dependencies
       run: |
         choco install ninja msys2 -y
-        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm --needed pkg-config mingw-w64-x86_64-gcc
+        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm --needed mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gcc
       
     - name: Configure and build
       run: |
         mkdir build
         cd build
-        # Установите переменные окружения для pkg-config
-        $env:PKG_CONFIG_EXECUTABLE = "C:\msys64\usr\bin\pkg-config.exe"
-        $env:PATH = "C:\msys64\usr\bin;" + $env:PATH
-        cmake -G Ninja -DPKG_CONFIG_EXECUTABLE="C:\msys64\usr\bin\pkg-config.exe" ..
+        $env:PATH = "C:\msys64\mingw64\bin;C:\msys64\usr\bin;" + $env:PATH
+        cmake -G Ninja ..
         ninja
         
     - name: Run Phase 2 verification
