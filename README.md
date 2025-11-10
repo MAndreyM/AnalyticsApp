@@ -112,12 +112,31 @@ make docs
 - `develop` → CI: Продакшен сборка (ci-main.yaml)
 - `main` → CI: Стабильная версия (ci-main.yaml)
 
+### Скрипты верификации
+
+```bash
+# Полная проверка Phase 2
+./scripts/test_phase2.sh        # Linux
+scripts\test_phase2.bat         # Windows
+
+# Проверка релиза 0.1.0
+./scripts/verify_release_0.1.0.sh
+
+# Индивидуальные тесты
+cd build
+./test_datamodels              # Тесты моделей данных
+./test_gradecalculator         # Тесты калькулятора (4 сценария)
+./test_filesystem              # Тесты файловой системы
+./bin/demo_datamodels          # Демонстрационная программа
+```
+
 ### Коммиты
 
 - `WIP:` - черновая работа
 - `PROGRES:` - значительный прогресс
 - `FEAT:` - завершенная функциональность
 - `FIX:` - исправления ошибок
+- `TEST:` - тесты и верификация
 - `DOCS:` - документация
 
 ## 📄 Лицензия
