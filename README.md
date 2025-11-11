@@ -25,6 +25,59 @@
 - ✅ **Документация** Doxygen
 - ✅ **Кроссплатформенная сборка** (RedOS, Alt Linux, Windows)
 
+## 🎯 Phase 3: File Processing Integration (Completed)
+
+### Новые возможности:
+
+#### 🔍 Интеллектуальное сканирование директорий
+- **Рекурсивный поиск** Excel файлов (.xls) в указанных директориях
+- **Фильтрация файлов** по расширению с поддержкой разных регистров
+- **Статистика сканирования** с информацией о времени выполнения и количестве найденных файлов
+- **Обработка ошибок** доступа с продолжением работы
+
+#### 📊 Интегрированное главное меню
+- **Единый интерфейс** для всех функций приложения
+- **Интерактивное управление** с проверкой ввода
+- **Демонстрационные режимы** для тестирования функциональности
+
+#### 🛠️ Утилиты файловой системы
+- **Проверка существования** файлов и директорий
+- **Определение типов** файлов (обычный файл, директория)
+- **Валидация Excel файлов** по расширению
+- **Получение информации** о размере файлов
+
+### Использование:
+
+```bash
+# Запуск основного приложения
+./build/bin/analytics_app
+
+# Демонстрация сканирования директорий
+./build/bin/demo_directory_scanner /path/to/scan
+
+# Запуск всех тестов
+cd build && ctest --output-on-failure
+```
+
+### Структура модулей:
+
+```
+src/
+├── DataProcessor/     # Модели данных и анализ оценок
+├── Utils/            # Утилиты файловой системы  
+└── FileProcessor/    # Сканирование и фильтрация файлов
+```
+
+### Тестирование:
+
+```bash
+# Полная проверка Phase 3
+./scripts/test_phase3.sh
+
+# Интеграционное тестирование
+./scripts/test_integration.sh
+```
+
 ## 📋 Поддерживаемые платформы
 
 - ✅ **RedOS** - основная целевая платформа
@@ -66,12 +119,14 @@ ninja
 ./test_datamodels
 ./test_gradecalculator
 ./test_filesystem
+./test_directory_scanner
 
-# Запуск демонстрационной программы
+# Запуск демонстрационных программ
 ./bin/demo_datamodels
+./bin/demo_directory_scanner
 
 # Основное приложение
-./bin/analytics_app --help
+./bin/analytics_app
 ```
 
 ## 🐳 Используемые Docker образы
@@ -110,8 +165,8 @@ docker run --rm -v $(pwd):/workspace mandrm/altlinux-ci-analytics:latest \
 git clone https://github.com/MAndreyM/AnalyticsApp.git
 cd AnalyticsApp
 
-# Полная проверка Phase 2
-./scripts/test_phase2.sh
+# Полная проверка Phase 3
+./scripts/test_phase3.sh
 
 # Или вручную
 mkdir build && cd build
@@ -122,9 +177,14 @@ ninja
 ./test_datamodels
 ./test_gradecalculator
 ./test_filesystem
+./test_directory_scanner
 
 # Демонстрация
 ./bin/demo_datamodels
+./bin/demo_directory_scanner
+
+# Основное приложение
+./bin/analytics_app
 ```
 
 ### RedOS / Alt Linux
@@ -135,7 +195,7 @@ cd AnalyticsApp
 mkdir build && cd build
 cmake -G Ninja ..
 ninja
-./bin/analytics_app --help
+./bin/analytics_app
 ```
 
 ### Windows
@@ -144,7 +204,7 @@ ninja
 git clone https://github.com/MAndreyM/AnalyticsApp.git
 cd AnalyticsApp
 build.bat
-build\bin\analytics_app.exe --help
+build\bin\analytics_app.exe
 ```
 
 ### Проверка сборки
@@ -156,40 +216,63 @@ scripts\verify_build.bat  # Windows
 
 ## 🎯 Использование
 
+### Основное приложение
 ```bash
-./analytics_app [OPTIONS] INPUT_DIRECTORY
+./analytics_app
 
-Options:
-  -o, --output DIR   Output directory for reports (default: current dir)
-  -v, --verbose      Enable verbose output
-  -h, --help         Show this help message
-
-Examples:
-  ./analytics_app /path/to/data
-  ./analytics_app -v -o ./reports /path/to/data
+# Интерактивное меню:
+# 1. 📊 Analyze student data
+# 2. 🔍 Scan directory for Excel files  
+# 3. 📁 Check file system utilities
+# 4. 🚪 Exit
 ```
 
-## 📊 Архитектура Phase 2
+### Утилиты командной строки
+```bash
+# Сканирование директории для Excel файлов
+./demo_directory_scanner [OPTIONS] DIRECTORY_PATH
 
-### Основные компоненты
+Options:
+  -h, --help       Show help message
+  -v, --verbose    Show detailed scanning information
+
+Examples:
+  ./demo_directory_scanner /path/to/data
+  ./demo_directory_scanner -v ./test_data
+```
+
+## 📊 Архитектура
+
+### Основные компоненты Phase 2
 
 - **DataProcessor/DataModels** - модели данных с валидацией
 - **DataProcessor/GradeCalculator** - логика анализа и округления оценок
 - **Utils/FileSystemUtils** - утилиты для работы с файлами
 - **AnalysisResult** - хранение результатов анализа
 
+### Новые компоненты Phase 3
+
+- **FileProcessor/DirectoryScanner** - рекурсивное сканирование директорий
+- **FileProcessor/ExcelFileFilter** - фильтрация Excel файлов по расширению
+- **ScanStatistics** - сбор статистики сканирования
+
 ### Бизнес-логика
 
 - **Округление оценок:** дробная часть ≥ 0.6 → округление вверх
 - **Критерий одной тройки:** только одна оценка "3" среди всех предметов
 - **Критерий нулевого балла:** хотя бы один средний балл равен 0.0
+- **Сканирование файлов:** рекурсивный поиск .xls файлов с обработкой ошибок
 
 ## 🔧 Скрипты верификации
 
 ```bash
-# Полная проверка Phase 2
-./scripts/test_phase2.sh        # Linux
-scripts\test_phase2.bat         # Windows
+# Полная проверка Phase 3
+./scripts/test_phase3.sh        # Linux
+scripts\test_phase3.bat         # Windows
+
+# Интеграционное тестирование
+./scripts/test_integration.sh
+scripts\test_integration.bat
 
 # Проверка релиза 0.1.0
 ./scripts/verify_release_0.1.0.sh
@@ -199,7 +282,9 @@ cd build
 ./test_datamodels              # Тесты моделей данных
 ./test_gradecalculator         # Тесты калькулятора (4 сценария)
 ./test_filesystem              # Тесты файловой системы
-./bin/demo_datamodels          # Демонстрационная программа
+./test_directory_scanner       # Тесты сканирования директорий
+./bin/demo_datamodels          # Демонстрационная программа моделей
+./bin/demo_directory_scanner   # Демонстрация сканирования
 ```
 
 ## Генерация документации
@@ -218,63 +303,44 @@ make docs
 # Документация будет доступна в build/docs/html/
 ```
 
-## 🔧 Для разработчиков
+## 👨‍💻 Для разработчиков
 
-### Git Flow
+### Архитектура
+Проект использует модульную архитектуру с четким разделением ответственности:
 
-- `feature/*` → CI: RedOS + Windows (ci-feature.yaml)
-- `develop` → CI: Продакшен сборка (ci-main.yaml)
-- `main` → CI: Стабильная версия (ci-main.yaml)
+- **DataProcessor/** - бизнес-логика и модели данных
+- **Utils/** - кроссплатформенные утилиты  
+- **FileProcessor/** - обработка файлов и сканирование директорий
 
-### Скрипты верификации
-
+### Начало работы
 ```bash
-# Полная проверка Phase 2
-./scripts/test_phase2.sh        # Linux
-scripts\test_phase2.bat         # Windows
+# Клонирование и установка
+git clone https://github.com/MAndreyM/AnalyticsApp.git
+cd AnalyticsApp
 
-# Проверка релиза 0.1.0
-./scripts/verify_release_0.1.0.sh
+# Сборка и тестирование
+./scripts/run_all_tests.sh
 
-# Индивидуальные тесты
-cd build
-./test_datamodels              # Тесты моделей данных
-./test_gradecalculator         # Тесты калькулятора (4 сценария)
-./test_filesystem              # Тесты файловой системы
-./bin/demo_datamodels          # Демонстрационная программа
+# Документация
+cd build && ninja docs
 ```
 
-### Коммиты
+### Документация для разработчиков
+- [Development Guide](docs/DEVELOPMENT_GUIDE.md) - полное руководство разработчика
+- [Phase 3 Completion](docs/PHASE3_COMPLETION.md) - отчет о завершении Phase 3
+- [Changelog](CHANGELOG.md) - история изменений
 
-- `WIP:` - черновая работа
-- `PROGRES:` - значительный прогресс
-- `FEAT:` - завершенная функциональность
-- `FIX:` - исправления ошибок
-- `TEST:` - тесты и верификация
-- `DOCS:` - документация
+### Вклад в проект
+1. Создайте feature ветку от `develop`
+2. Реализуйте изменения с тестами
+3. Убедитесь, что все тесты проходят
+4. Создайте Pull Request
 
-### Структура Phase 2
-
-```text
-AnalyticsApp/
-├── src/
-│   ├── DataProcessor/     # Модели данных + анализ
-│   │   ├── DataModels.h/cpp
-│   │   └── GradeCalculator.h/cpp
-│   ├── Utils/            # Утилиты файловой системы
-│   │   ├── FileSystemUtils.h/cpp
-│   │   └── CMakeLists.txt
-│   ├── demo_datamodels.cpp  # Демо-программа
-│   └── main.cpp
-├── tests/
-│   ├── test_datamodels.cpp
-│   ├── test_gradecalculator.cpp
-│   └── test_filesystem.cpp
-└── scripts/              # Скрипты верификации
-    ├── test_phase2.sh
-    ├── test_phase2.bat
-    └── verify_release_0.1.0.sh
-```
+### Code Style
+- C++20 с современными идиомами
+- Четкое разделение интерфейсов и реализаций
+- Комprehensive тестирование
+- Документация Doxygen для публичного API
 
 ## 📄 Лицензия
 

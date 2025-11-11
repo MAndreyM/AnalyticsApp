@@ -1,30 +1,23 @@
-# ============================================================================
-# DataProcessor MODULE
-# ============================================================================
+# DataProcessor Module CMake Configuration
+# ==========================================
 
-message(STATUS "Configuring DataProcessor module...")
-
-# Библиотека обработки данных
-add_library(DataProcessor
+set(DATA_PROCESSOR_SOURCES
     DataModels.cpp
-    GradeCalculator.cpp  # ← ДОБАВЛЕНО
+    GradeCalculator.cpp
 )
 
-# Публичные include директории
-target_include_directories(DataProcessor PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}
+# Create DataProcessor as OBJECT library
+add_library(DataProcessor OBJECT ${DATA_PROCESSOR_SOURCES})
+
+target_include_directories(DataProcessor 
+    PUBLIC 
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# Настройка компиляции
-target_compile_features(DataProcessor PRIVATE cxx_std_20)
+set_target_properties(DataProcessor 
+    PROPERTIES 
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+)
 
-if(MSVC)
-    target_compile_options(DataProcessor PRIVATE /W4 /permissive-)
-else()
-    target_compile_options(DataProcessor PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-# Информация о модуле
-message(STATUS "DataProcessor module configured")
-message(STATUS "  Sources: DataModels.cpp, GradeCalculator.cpp")
-message(STATUS "  Headers: DataModels.h, GradeCalculator.h")
+message(STATUS "DataProcessor module configured - OBJECT library")

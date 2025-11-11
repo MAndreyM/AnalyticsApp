@@ -1,30 +1,22 @@
-# ============================================================================
-# UTILS MODULE
-# ============================================================================
+# Utils Module CMake Configuration
+# =================================
 
-message(STATUS "Configuring Utils module...")
-
-# Библиотека утилит
-add_library(Utils
+set(UTILS_SOURCES
     FileSystemUtils.cpp
 )
 
-# Публичные include директории
-target_include_directories(Utils PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}
+# Create Utils as OBJECT library
+add_library(Utils OBJECT ${UTILS_SOURCES})
+
+target_include_directories(Utils
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# Настройка компиляции
-target_compile_features(Utils PRIVATE cxx_std_20)
+set_target_properties(Utils 
+    PROPERTIES 
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+)
 
-if(MSVC)
-    target_compile_options(Utils PRIVATE /W4 /permissive-)
-else()
-    target_compile_options(Utils PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-# Информация о модуле
-message(STATUS "  Utils            - File system utilities") 
-message(STATUS "    Sources: FileSystemUtils.cpp")
-message(STATUS "    Headers: FileSystemUtils.h")
-message(STATUS "    Dependencies: std::filesystem")
+message(STATUS "Utils module configured - OBJECT library")

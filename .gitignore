@@ -10,4 +10,5 @@ lib/
 Thumbs.db
 *.log
 *.tmp
-*.temp
+*.temptest_data/
+test_data/
