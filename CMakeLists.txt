@@ -92,10 +92,25 @@ endif()
 # УСТАНОВКА
 # ============================================================================
 
-install(TARGETS analytics_app
-    RUNTIME DESTINATION bin
-    COMPONENT applications
-)
+#install(TARGETS analytics_app
+#    RUNTIME DESTINATION bin
+#    COMPONENT applications
+#)
+
+# Устанавливаем только существующие цели
+if(TARGET analytics_app)
+    install(TARGETS analytics_app
+        RUNTIME DESTINATION bin
+        COMPONENT applications
+    )
+endif()
+
+if(TARGET demo_directory_scanner)
+    install(TARGETS demo_directory_scanner
+        RUNTIME DESTINATION bin  
+        COMPONENT applications
+    )
+endif()
 
 # ============================================================================
 # ИНФОРМАЦИЯ О ПРОЕКТЕ

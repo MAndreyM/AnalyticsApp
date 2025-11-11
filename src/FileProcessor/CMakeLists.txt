@@ -6,15 +6,13 @@ set(FILE_PROCESSOR_SOURCES
     DirectoryScanner.cpp
 )
 
-# Create FileProcessor library
-add_library(FileProcessor ${FILE_PROCESSOR_SOURCES})
+# Create FileProcessor as OBJECT library
+add_library(FileProcessor OBJECT ${FILE_PROCESSOR_SOURCES})
 
 # Include directories
 target_include_directories(FileProcessor 
     PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
 # Link dependencies
@@ -33,11 +31,11 @@ endif()
 # Set C++ standard
 target_compile_features(FileProcessor PUBLIC cxx_std_20)
 
-# Installation configuration (if needed)
-install(TARGETS FileProcessor
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
+# Set output directories for object files
+set_target_properties(FileProcessor 
+    PROPERTIES 
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-message(STATUS "FileProcessor module configured")
+message(STATUS "FileProcessor module configured - OBJECT library")

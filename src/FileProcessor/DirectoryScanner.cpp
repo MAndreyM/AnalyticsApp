@@ -2,6 +2,7 @@
 #include "ExcelFileFilter.h"
 #include <stdexcept>
 #include <filesystem>
+#include <iostream>
 
 std::vector<std::string> DirectoryScanner::findExcelFiles(const std::string& directoryPath) {
     // Сбрасываем статистику перед новым сканированием

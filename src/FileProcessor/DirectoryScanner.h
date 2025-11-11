@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <iostream>
 
 /**
  * @brief Сканер директорий для поиска Excel файлов
