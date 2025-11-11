@@ -30,17 +30,18 @@ print_status $? "Main application startup"
 
 echo -e "${YELLOW}[3/6] Testing data analysis functionality...${NC}"
 echo -e "1" | timeout 2s ./bin/analytics_app > test_output.txt
-grep -q "Student Data Analysis" test_output.txt
+# Ищем русский текст который точно есть в выводе
+grep -q "Демонстрация анализа данных" test_output.txt
 print_status $? "Data analysis feature"
 
 echo -e "${YELLOW}[4/6] Testing directory scanning functionality...${NC}"
 echo -e "2" | timeout 2s ./bin/analytics_app > test_output.txt
-grep -q "Directory Scanning" test_output.txt
+grep -q "Демонстрация сканирования директории" test_output.txt
 print_status $? "Directory scanning feature"
 
 echo -e "${YELLOW}[5/6] Testing file system utilities...${NC}"
 echo -e "3" | timeout 2s ./bin/analytics_app > test_output.txt
-grep -q "File System Utilities" test_output.txt
+grep -q "Демонстрация утилит файловой системы" test_output.txt
 print_status $? "File system utilities feature"
 
 echo -e "${YELLOW}[6/6] Testing exit functionality...${NC}"

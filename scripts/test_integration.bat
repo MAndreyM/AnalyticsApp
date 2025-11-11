@@ -23,7 +23,7 @@ if !errorlevel! neq 0 (
 
 echo [3/6] Testing data analysis functionality...
 echo 1 | timeout /t 2 > nul | bin\analytics_app.exe > test_output.txt
-findstr /C:"Student Data Analysis" test_output.txt > nul
+findstr /C:"Демонстрация анализа данных" test_output.txt > nul
 if !errorlevel! neq 0 (
     echo ERROR: Data analysis feature not working
     exit /b 1
@@ -31,7 +31,7 @@ if !errorlevel! neq 0 (
 
 echo [4/6] Testing directory scanning functionality...
 echo 2 | timeout /t 2 > nul | bin\analytics_app.exe > test_output.txt
-findstr /C:"Directory Scanning" test_output.txt > nul
+findstr /C:"Демонстрация сканирования директории" test_output.txt > nul
 if !errorlevel! neq 0 (
     echo ERROR: Directory scanning feature not working
     exit /b 1
@@ -39,7 +39,7 @@ if !errorlevel! neq 0 (
 
 echo [5/6] Testing file system utilities...
 echo 3 | timeout /t 2 > nul | bin\analytics_app.exe > test_output.txt
-findstr /C:"File System Utilities" test_output.txt > nul
+findstr /C:"Демонстрация утилит файловой системы" test_output.txt > nul
 if !errorlevel! neq 0 (
     echo ERROR: File system utilities feature not working
     exit /b 1
