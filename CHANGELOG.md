@@ -5,7 +5,7 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 и проект придерживается [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2024-11-11
+## [0.1.0] - 2025-11-11
 
 ### Добавлено
 - **Phase 1**: Базовая структура проекта с CMake и Ninja
