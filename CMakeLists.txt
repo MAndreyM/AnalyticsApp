@@ -20,7 +20,7 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
-# Линковка с std::filesystem ← ДОБАВЛЕНО
+# Линковка с std::filesystem
 if(MSVC)
     # MSVC автоматически линкует std::filesystem
 else()
@@ -92,11 +92,6 @@ endif()
 # УСТАНОВКА
 # ============================================================================
 
-#install(TARGETS analytics_app
-#    RUNTIME DESTINATION bin
-#    COMPONENT applications
-#)
-
 # Устанавливаем только существующие цели
 if(TARGET analytics_app)
     install(TARGETS analytics_app
@@ -124,19 +119,18 @@ message(STATUS "   Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "")
 message(STATUS "📦 Available Targets:")
 message(STATUS "   analytics_app    - Main application")
-#message(STATUS "   demo_datamodels  - Data models demonstration")
-#message(STATUS "   test_datamodels  - Data models unit tests")
 message(STATUS "   test_gradecalculator - Grade calculator tests (4 scenarios)")
 message(STATUS "   docs             - Generate documentation")
 message(STATUS "")
 message(STATUS "🏗️  Project Structure:")
 message(STATUS "   src/DataProcessor/ - Data models and analysis logic")
-message(STATUS "   src/Utils/         - File system utilities")  # ← ОБНОВЛЕНО
-message(STATUS "   tests/             - Unit tests and test scenarios")
+message(STATUS "   src/Utils/         - File system utilities")
+message(STATUS "   src/FileProcessor/ - Directory scanning and Excel file processing")
 message(STATUS "")
 message(STATUS "🚀 Phase 2 Features:")
 message(STATUS "   ✅ Data models with validation")
 message(STATUS "   ✅ Grade calculator with rounding logic")
 message(STATUS "   ✅ 4 comprehensive test scenarios")
-message(STATUS "   ✅ File system utilities")  # ← ДОБАВЛЕНО
-#message(STATUS "   ✅ Demonstration program")
+message(STATUS "   ✅ File system utilities")
+message(STATUS "   ✅ Directory scanner with recursive search")
+message(STATUS "   ✅ Excel file filtering with statistics")
