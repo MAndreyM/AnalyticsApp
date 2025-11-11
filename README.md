@@ -61,7 +61,7 @@ cd build && ctest --output-on-failure
 
 ### Структура модулей:
 
-```text
+```
 src/
 ├── DataProcessor/     # Модели данных и анализ оценок
 ├── Utils/            # Утилиты файловой системы  
@@ -75,29 +75,27 @@ src/
 ./scripts/test_phase3.sh
 
 # Интеграционное тестирование
-./scripts/demo_integration_test.sh
+./scripts/test_integration.sh
 ```
 
 ## 📋 Поддерживаемые платформы
 
-- ✅ RedOS - основная целевая платформа
-- ✅ Alt Linux Latest - актуальная версия
-- ✅ Alt Linux 10 - стабильная версия
-- ✅ Windows - поддержка MSVC
+- ✅ **RedOS** - основная целевая платформа
+- ✅ **Alt Linux Latest** - актуальная версия
+- ✅ **Alt Linux 10** - стабильная версия  
+- ✅ **Windows** - поддержка MSVC
 
 ## 🧪 Тестирование и демонстрация
 
 ### Тестовые сценарии
-
 Приложение включает 4 комплексных тестовых сценария:
 
-1. Класс без одной тройки и без нулевых баллов
-2. Класс с одной тройкой и двумя тройками
-3. Класс с нулевыми баллами
-4. Класс с одной тройкой и нулевыми баллами
+1. **Класс без одной тройки и без нулевых баллов**
+2. **Класс с одной тройкой и двумя тройками**  
+3. **Класс с нулевыми баллами**
+4. **Класс с одной тройкой и нулевыми баллами**
 
 ### Формат вывода
-
 Демонстрационная программа выводит результаты в формате:
 
 ```text
@@ -111,7 +109,6 @@ src/
 ```
 
 ### Запуск тестов и демо
-
 ```bash
 # Сборка проекта
 mkdir build && cd build
@@ -220,7 +217,6 @@ scripts\verify_build.bat  # Windows
 ## 🎯 Использование
 
 ### Основное приложение
-
 ```bash
 ./analytics_app
 
@@ -232,7 +228,6 @@ scripts\verify_build.bat  # Windows
 ```
 
 ### Утилиты командной строки
-
 ```bash
 # Сканирование директории для Excel файлов
 ./demo_directory_scanner [OPTIONS] DIRECTORY_PATH
@@ -276,8 +271,8 @@ Examples:
 scripts\test_phase3.bat         # Windows
 
 # Интеграционное тестирование
-./scripts/demo_integration_test.sh
-scripts\demo_integration_test.bat
+./scripts/test_integration.sh
+scripts\test_integration.bat
 
 # Проверка релиза 0.1.0
 ./scripts/verify_release_0.1.0.sh
@@ -295,12 +290,10 @@ cd build
 ## Генерация документации
 
 ### Требования
-
 - Doxygen 1.8.0 или выше
 - Graphviz (для диаграмм классов)
 
 ### Генерация
-
 ```bash
 # Сборка документации
 mkdir build && cd build
@@ -310,72 +303,45 @@ make docs
 # Документация будет доступна в build/docs/html/
 ```
 
-## 🔧 Для разработчиков
+## 👨‍💻 Для разработчиков
 
-### Git Flow
+### Архитектура
+Проект использует модульную архитектуру с четким разделением ответственности:
 
-- 'feature/*' → CI: RedOS + Windows (ci-feature.yaml)
-- 'develop' → CI: Продакшен сборка (ci-main.yaml)
-- 'main' → CI: Стабильная версия (ci-main.yaml)
+- **DataProcessor/** - бизнес-логика и модели данных
+- **Utils/** - кроссплатформенные утилиты  
+- **FileProcessor/** - обработка файлов и сканирование директорий
 
-### Скрипты верификации
+### Начало работы
 ```bash
-# Полная проверка Phase 3
-./scripts/test_phase3.sh        # Linux
-scripts\test_phase3.bat         # Windows
+# Клонирование и установка
+git clone https://github.com/MAndreyM/AnalyticsApp.git
+cd AnalyticsApp
 
-# Проверка релиза 0.1.0
-./scripts/verify_release_0.1.0.sh
+# Сборка и тестирование
+./scripts/run_all_tests.sh
 
-# Индивидуальные тесты
-cd build
-./test_datamodels              # Тесты моделей данных
-./test_gradecalculator         # Тесты калькулятора (4 сценария)
-./test_filesystem              # Тесты файловой системы
-./test_directory_scanner       # Тесты сканирования директорий
-./bin/demo_datamodels          # Демонстрационная программа
-./bin/demo_directory_scanner   # Демонстрация сканирования
+# Документация
+cd build && ninja docs
 ```
 
-### Коммиты
+### Документация для разработчиков
+- [Development Guide](docs/DEVELOPMENT_GUIDE.md) - полное руководство разработчика
+- [Phase 3 Completion](docs/PHASE3_COMPLETION.md) - отчет о завершении Phase 3
+- [Changelog](CHANGELOG.md) - история изменений
 
-- 'WIP:' - черновая работа
-- 'PROGRES:' - значительный прогресс
-- 'FEAT:' - завершенная функциональность
-- 'FIX:' - исправления ошибок
-- 'TEST:' - тесты и верификация
-- 'DOCS:' - документация
+### Вклад в проект
+1. Создайте feature ветку от `develop`
+2. Реализуйте изменения с тестами
+3. Убедитесь, что все тесты проходят
+4. Создайте Pull Request
 
-### Структура проекта
-
-```text
-AnalyticsApp/
-├── src/
-│   ├── DataProcessor/     # Модели данных + анализ
-│   │   ├── DataModels.h/cpp
-│   │   └── GradeCalculator.h/cpp
-│   ├── Utils/            # Утилиты файловой системы
-│   │   ├── FileSystemUtils.h/cpp
-│   │   └── CMakeLists.txt
-│   ├── FileProcessor/    # Сканирование и фильтрация файлов
-│   │   ├── DirectoryScanner.h/cpp
-│   │   ├── ExcelFileFilter.h/cpp
-│   │   └── CMakeLists.txt
-│   ├── demo_datamodels.cpp      # Демо-программа моделей
-│   ├── demo_directory_scanner.cpp # Демо-программа сканирования
-│   └── main.cpp                 # Основное приложение
-├── tests/
-│   ├── test_datamodels.cpp
-│   ├── test_gradecalculator.cpp
-│   ├── test_filesystem.cpp
-│   └── test_directory_scanner.cpp
-└── scripts/              # Скрипты верификации
-    ├── test_phase3.sh
-    ├── test_phase3.bat
-    ├── demo_integration_test.sh
-    ├── demo_integration_test.bat
-    └── verify_release_0.1.0.sh
-```
+### Code Style
+- C++20 с современными идиомами
+- Четкое разделение интерфейсов и реализаций
+- Комprehensive тестирование
+- Документация Doxygen для публичного API
 
 ## 📄 Лицензия
+
 MIT License
