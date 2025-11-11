@@ -1,228 +1,214 @@
-/**
- * @file main.cpp
- * @brief Главный файл приложения для анализа успеваемости учащихся
- * @author MAndreyM
- * @version 1.0.0
- * @date 2024
- */
-
-#include "DataProcessor/DataModels.h"
-
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 #include <algorithm>
-#include <stdexcept>
+#include "DataProcessor/DataModels.h"
+#include "DataProcessor/GradeCalculator.h"
+#include "FileProcessor/DirectoryScanner.h"
+#include "Utils/FileSystemUtils.h"
 
 /**
- * @brief Структура для хранения параметров командной строки
- * 
- * Содержит все опции, переданные при запуске приложения.
+ * @brief Выводит главное меню приложения
  */
-struct CommandLineOptions {
-    std::string inputDirectory;    ///< Путь к директории с входными файлами
-    std::string outputDirectory = ".";  ///< Путь для выходных отчетов (по умолчанию: текущая директория)
-    bool verbose = false;          ///< Флаг подробного вывода
-    bool helpRequested = false;    ///< Флаг запроса справки
-};
+void printMainMenu() {
+    std::cout << "\n🎯 AnalyticsApp - Main Menu\n";
+    std::cout << "===========================\n";
+    std::cout << "1. 📊 Analyze student data\n";
+    std::cout << "2. 🔍 Scan directory for Excel files\n";
+    std::cout << "3. 📁 Check file system utilities\n";
+    std::cout << "4. 🚪 Exit\n";
+    std::cout << "===========================\n";
+    std::cout << "Select option (1-4): ";
+}
 
 /**
- * @brief Класс для разбора аргументов командной строки
- * 
- * Обрабатывает аргументы, переданные при запуске приложения,
- * и преобразует их в структуру CommandLineOptions.
+ * @brief Демонстрация анализа данных студентов
  */
-class CommandLineParser {
-public:
-    /**
-     * @brief Разбирает аргументы командной строки
-     * 
-     * @param argc Количество аргументов
-     * @param argv Массив аргументов
-     * @return CommandLineOptions Структура с разобранными параметрами
-     * @throw std::runtime_error Если обязательные параметры не указаны
-     * 
-     * @note Поддерживаемые опции:
-     * - -h, --help: Показать справку
-     * - -v, --verbose: Включить подробный вывод
-     * - -o, --output: Указать директорию для отчетов
-     */
-    CommandLineOptions parse(int argc, char* argv[]) {
-        CommandLineOptions options;
+void demonstrateDataAnalysis() {
+    std::cout << "\n📊 Student Data Analysis Demo\n";
+    std::cout << "============================\n";
+    
+    Student student1("10A", "Иванов Иван Иванович");
+    Student student2("10B", "Петрова Анна Сергеевна");
+    
+    std::cout << "Created sample students:\n";
+    std::cout << "  " << student1.getFullName() << " (" << student1.getClassName() << ")\n";
+    std::cout << "  " << student2.getFullName() << " (" << student2.getClassName() << ")\n";
+    
+    std::cout << "\n📈 Grade Calculator Features:\n";
+    std::cout << "  - Grade rounding logic (≥ 0.6 → round up)\n";
+    std::cout << "  - Performance analysis\n";
+    std::cout << "  - 4 comprehensive test scenarios\n";
+    
+    std::cout << "\n💡 Run './bin/demo_datamodels' for full data models demonstration\n";
+    std::cout << "💡 Run './test_gradecalculator' for comprehensive test scenarios\n";
+}
+
+/**
+ * @brief Демонстрация сканирования директории
+ */
+void demonstrateDirectoryScanning() {
+    std::cout << "\n🔍 Directory Scanning Demo\n";
+    std::cout << "=========================\n";
+    
+    std::string directoryPath;
+    std::cout << "Enter directory path to scan (or press Enter for './test_data'): ";
+    std::getline(std::cin, directoryPath);
+    
+    if (directoryPath.empty()) {
+        directoryPath = "./test_data";
+    }
+    
+    try {
+        DirectoryScanner scanner;
         
-        if (argc < 2) {
-            options.helpRequested = true;
-            return options;
+        std::cout << "⏳ Scanning directory: " << directoryPath << "\n";
+        auto files = scanner.findExcelFiles(directoryPath);
+        auto stats = scanner.getLastScanStatistics();
+        
+        std::cout << "\n🎯 Scan Results:\n";
+        if (!files.empty()) {
+            std::cout << "✅ Found " << files.size() << " Excel file(s):\n";
+            for (size_t i = 0; i < files.size(); ++i) {
+                std::cout << "   " << (i + 1) << ". " << files[i] << "\n";
+            }
+        } else {
+            std::cout << "❌ No Excel files found with .xls extension\n";
         }
         
-        std::vector<std::string> args(argv + 1, argv + argc);
+        std::cout << "\n";
+        stats.print();
         
-        for (size_t i = 0; i < args.size(); ++i) {
-            if (args[i] == "-h" || args[i] == "--help") {
-                options.helpRequested = true;
-                return options;
-            } else if (args[i] == "-v" || args[i] == "--verbose") {
-                options.verbose = true;
-            } else if (args[i] == "-o" || args[i] == "--output") {
-                if (i + 1 < args.size()) {
-                    options.outputDirectory = args[++i];
-                } else {
-                    throw std::runtime_error("Output directory not specified");
+    } catch (const std::exception& e) {
+        std::cout << "💥 Error: " << e.what() << "\n";
+        std::cout << "💡 Tip: Create a 'test_data' directory with some .xls files for testing\n";
+    }
+}
+
+/**
+ * @brief Демонстрация утилит файловой системы
+ */
+void demonstrateFileSystemUtilities() {
+    std::cout << "\n📁 File System Utilities Demo\n";
+    std::cout << "============================\n";
+    
+    std::string testPath;
+    std::cout << "Enter file/directory path to check (or press Enter for current directory): ";
+    std::getline(std::cin, testPath);
+    
+    if (testPath.empty()) {
+        testPath = ".";
+    }
+    
+    try {
+        std::cout << "📊 File System Information:\n";
+        std::cout << "  Path: " << testPath << "\n";
+        
+        bool exists = std::filesystem::exists(testPath);
+        std::cout << "  Exists: " << (exists ? "✅ Yes" : "❌ No") << "\n";
+        
+        if (exists) {
+            bool is_file = std::filesystem::is_regular_file(testPath);
+            bool is_dir = std::filesystem::is_directory(testPath);
+            
+            std::cout << "  Is file: " << (is_file ? "📄 Yes" : "❌ No") << "\n";
+            std::cout << "  Is directory: " << (is_dir ? "📁 Yes" : "❌ No") << "\n";
+            
+            if (is_file) {
+                std::filesystem::path path(testPath);
+                std::string extension = path.extension().string();
+                std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+                
+                std::cout << "  Is Excel file: " << (extension == ".xls" ? "📊 Yes" : "❌ No") << "\n";
+                
+                try {
+                    auto size = std::filesystem::file_size(testPath);
+                    std::cout << "  File size: " << size << " bytes\n";
+                } catch (const std::exception& e) {
+                    std::cout << "  File size: ❌ Unable to determine\n";
                 }
-            } else {
-                // Первый неопциональный аргумент - входная директория
-                if (options.inputDirectory.empty()) {
-                    options.inputDirectory = args[i];
+            }
+            
+            if (is_dir) {
+                size_t fileCount = 0;
+                size_t dirCount = 0;
+                try {
+                    for (const auto& entry : std::filesystem::directory_iterator(testPath)) {
+                        if (entry.is_regular_file()) {
+                            fileCount++;
+                        } else if (entry.is_directory()) {
+                            dirCount++;
+                        }
+                        if (fileCount + dirCount > 10) break; // Ограничиваем вывод
+                    }
+                    std::cout << "  Files: " << fileCount << ", Directories: " << dirCount << " (showing first 10 items)\n";
+                } catch (const std::exception& e) {
+                    std::cout << "  Directory contents: ❌ Unable to list\n";
                 }
             }
         }
         
-        if (options.inputDirectory.empty() && !options.helpRequested) {
-            throw std::runtime_error("Input directory not specified");
-        }
-        
-        return options;
+    } catch (const std::exception& e) {
+        std::cout << "💥 Error: " << e.what() << "\n";
     }
-    
-    /**
-     * @brief Выводит справку по использованию программы
-     * 
-     * @param programName Имя программы (argv[0])
-     */
-    void printHelp(const std::string& programName) {
-        std::cout << "Usage: " << programName << " [OPTIONS] INPUT_DIRECTORY\n\n"
-                  << "Analyze student performance data from Excel files\n\n"
-                  << "Arguments:\n"
-                  << "  INPUT_DIRECTORY    Path to directory containing .xls files\n\n"
-                  << "Options:\n"
-                  << "  -o, --output DIR   Output directory for reports (default: current dir)\n"
-                  << "  -v, --verbose      Enable verbose output\n"
-                  << "  -h, --help         Show this help message\n\n"
-                  << "Examples:\n"
-                  << "  " << programName << " /path/to/data\n"
-                  << "  " << programName << " -o ./reports /path/to/data\n"
-                  << "  " << programName << " -v --output ./results /path/to/data\n";
-    }
-};
-
-/**
- * @brief Класс для логирования сообщений приложения
- * 
- * Поддерживает разные уровни логирования: info, warning, error, debug.
- * Debug сообщения выводятся только в verbose режиме.
- */
-class Logger {
-private:
-    bool verbose_;  ///< Флаг включения подробного вывода
-    
-public:
-    /**
-     * @brief Конструктор логгера
-     * 
-     * @param verbose Включить подробный вывод (по умолчанию: false)
-     */
-    explicit Logger(bool verbose = false) : verbose_(verbose) {}
-    
-    /**
-     * @brief Устанавливает режим подробного вывода
-     * 
-     * @param verbose Если true, debug сообщения будут выводиться
-     */
-    void setVerbose(bool verbose) {
-        verbose_ = verbose;
-    }
-    
-    /**
-     * @brief Выводит информационное сообщение
-     * 
-     * @param message Текст сообщения
-     */
-    void info(const std::string& message) {
-        std::cout << "[INFO] " << message << std::endl;
-    }
-    
-    /**
-     * @brief Выводит предупреждение
-     * 
-     * @param message Текст предупреждения
-     */
-    void warning(const std::string& message) {
-        std::cout << "[WARNING] " << message << std::endl;
-    }
-    
-    /**
-     * @brief Выводит сообщение об ошибке
-     * 
-     * @param message Текст ошибки
-     */
-    void error(const std::string& message) {
-        std::cerr << "[ERROR] " << message << std::endl;
-    }
-    
-    /**
-     * @brief Выводит отладочное сообщение (только в verbose режиме)
-     * 
-     * @param message Текст отладочного сообщения
-     */
-    void debug(const std::string& message) {
-        if (verbose_) {
-            std::cout << "[DEBUG] " << message << std::endl;
-        }
-    }
-};
+}
 
 /**
  * @brief Основная функция приложения
- * 
- * @param argc Количество аргументов командной строки
- * @param argv Массив аргументов командной строки
- * @return int Код возврата: 0 - успех, 1 - ошибка
- * 
- * @par Пример использования:
- * @code{.sh}
- * ./analytics_app /path/to/data
- * ./analytics_app -v -o ./reports /path/to/data
- * ./analytics_app --help
- * @endcode
  */
-int main(int argc, char* argv[]) {
-    CommandLineParser parser;
-    Logger logger;
+int main() {
+    std::cout << "🚀 Welcome to AnalyticsApp!\n";
+    std::cout << "Version 0.1.0 - Phase 3 Integration\n";
+    std::cout << "===================================\n";
     
-    try {
-        CommandLineOptions options = parser.parse(argc, argv);
+    bool running = true;
+    
+    while (running) {
+        printMainMenu();
         
-        if (options.helpRequested) {
-            parser.printHelp(argv[0]);
-            return 0;
+        std::string input;
+        std::getline(std::cin, input);
+        
+        if (input.empty()) {
+            continue;
         }
         
-        logger.setVerbose(options.verbose);
-        logger.info("Analytics App - Starting...");
-        logger.debug("Verbose mode enabled");
+        int choice = 0;
+        try {
+            choice = std::stoi(input);
+        } catch (const std::exception& e) {
+            std::cout << "❌ Invalid input. Please enter a number 1-4.\n";
+            continue;
+        }
         
-        // Вывод информации о параметрах
-        logger.info("Input directory: " + options.inputDirectory);
-        logger.info("Output directory: " + options.outputDirectory);
+        switch (choice) {
+            case 1:
+                demonstrateDataAnalysis();
+                break;
+                
+            case 2:
+                demonstrateDirectoryScanning();
+                break;
+                
+            case 3:
+                demonstrateFileSystemUtilities();
+                break;
+                
+            case 4:
+                running = false;
+                std::cout << "\n👋 Thank you for using AnalyticsApp! Goodbye!\n";
+                break;
+                
+            default:
+                std::cout << "❌ Invalid option. Please select 1-4.\n";
+                break;
+        }
         
-        // Здесь будет основная логика приложения
-        logger.info("Processing directory: " + options.inputDirectory);
-        
-        // Заглушка для демонстрации
-        logger.debug("Scanning for Excel files...");
-        logger.debug("Parsing student data...");
-        logger.debug("Analyzing performance...");
-        logger.debug("Generating reports...");
-        
-        logger.info("Processing completed successfully!");
-        
-    } catch (const std::exception& e) {
-        logger.error(e.what());
-        std::cerr << "\nUse '" << argv[0] << " --help' for usage information.\n";
-        return 1;
-    } catch (...) {
-        logger.error("Unknown error occurred");
-        return 1;
+        if (running && choice != 4) {
+            std::cout << "\nPress Enter to continue...";
+            std::cin.get();
+        }
     }
     
     return 0;
