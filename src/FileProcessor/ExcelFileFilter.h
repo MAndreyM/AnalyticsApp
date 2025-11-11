@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 
 /**
  * @brief Фильтр для Excel файлов с поддержкой рекурсивного поиска
@@ -27,7 +28,7 @@ public:
      * @return true Если файл имеет расширение .xls (регистронезависимо)
      * @return false Если файл не существует или не является .xls
      */
-    static bool isExcelFile(const std::string& filePath);
+    static bool isExcelFile(const std::filesystem::path& filePath);
     
     /**
      * @brief Нормализует расширение файла (приводит к нижнему регистру)
@@ -44,6 +45,6 @@ private:
      * @param directoryPath Путь к директории для сканирования
      * @param excelFiles Вектор для сохранения найденных Excel файлов
      */
-    static void scanDirectoryRecursive(const std::string& directoryPath, 
+    static void scanDirectoryRecursive(const std::filesystem::path& directoryPath, 
                                       std::vector<std::string>& excelFiles);
 };

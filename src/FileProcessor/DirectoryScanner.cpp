@@ -1,19 +1,28 @@
 #include "DirectoryScanner.h"
+#include "ExcelFileFilter.h"
 #include <stdexcept>
 
 std::vector<std::string> DirectoryScanner::findExcelFiles(const std::string& directoryPath) {
-    // TODO: Реализовать рекурсивное сканирование директории
-    // TODO: Интегрировать с ExcelFileFilter
-    // TODO: Обновлять статистику сканирования
-    
+    // Сбрасываем статистику перед новым сканированием
     lastStatistics_.reset();
     
-    // Заглушка - возвращаем пустой список
-    return std::vector<std::string>();
+    try {
+        // Используем ExcelFileFilter для рекурсивного поиска
+        auto files = ExcelFileFilter::findExcelFilesRecursive(directoryPath);
+        
+        // Обновляем статистику
+        lastStatistics_.excelFilesFound = files.size();
+        
+        return files;
+    } catch (const std::exception& e) {
+        // Увеличиваем счетчик ошибок
+        lastStatistics_.accessErrors++;
+        throw std::runtime_error("Directory scanning failed: " + std::string(e.what()));
+    }
 }
 
 std::vector<std::string> DirectoryScanner::findExcelFiles(const std::string& directoryPath, int maxDepth) {
-    // TODO: Реализовать сканирование с ограничением глубины
-    // Временная реализация - используем базовый метод
+    // Временная реализация - используем базовый метод без ограничения глубины
+    // TODO: В будущем добавить поддержку maxDepth
     return findExcelFiles(directoryPath);
 }

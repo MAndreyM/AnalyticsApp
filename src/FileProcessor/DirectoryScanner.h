@@ -47,6 +47,15 @@ public:
             directoriesScanned = 0;
             accessErrors = 0;
         }
+        
+        /**
+         * @brief Выводит статистику в читаемом формате
+         */
+        void print() const {
+            std::cout << "Scan Statistics:\n"
+                      << "  Excel files found: " << excelFilesFound << "\n"
+                      << "  Access errors: " << accessErrors << "\n";
+        }
     };
     
     /**
