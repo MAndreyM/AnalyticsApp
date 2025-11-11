@@ -20,6 +20,8 @@ std::vector<std::string> ExcelFileFilter::findExcelFilesRecursive(const std::str
         scanDirectoryRecursive(directoryPath, excelFiles);
     } catch (const std::filesystem::filesystem_error& e) {
         throw std::runtime_error("Filesystem error while scanning directory: " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Unexpected error during directory scanning: " + std::string(e.what()));
     }
     
     return excelFiles;
@@ -47,9 +49,8 @@ std::string ExcelFileFilter::normalizeExtension(const std::string& extension) {
     std::string result = extension;
     
     // Приводим к нижнему регистру
-    for (char& c : result) {
-        c = std::tolower(static_cast<unsigned char>(c));
-    }
+    std::transform(result.begin(), result.end(), result.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
     
     return result;
 }
@@ -67,9 +68,9 @@ void ExcelFileFilter::scanDirectoryRecursive(const std::filesystem::path& direct
             }
         }
     } catch (const std::filesystem::filesystem_error& e) {
-        // Логируем ошибку, но не прерываем выполнение полностью
-        std::cerr << "Warning: Cannot access directory - " << e.path1().string() 
-                  << " - " << e.what() << std::endl;
-        throw; // Пробрасываем исключение дальше
+        // Логируем ошибку и пробрасываем исключение дальше
+        std::cerr << "Warning: Filesystem error during scanning - " 
+                  << e.path1().string() << " - " << e.what() << std::endl;
+        throw;
     }
 }
