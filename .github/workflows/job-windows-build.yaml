@@ -20,86 +20,53 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Install dependencies
-      run: |
-        choco install ninja -y
+    - name: Setup MSYS2 and install libxls
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: |
+          mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-libxls
         
-    - name: Download and build libxls from source
-      run: |
-        echo "📦 Downloading and building libxls from source..."
-        
-        # Скачиваем исходники libxls
-        curl -L -o libxls-1.6.2.tar.gz https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz
-        tar -xzf libxls-1.6.2.tar.gz
-        cd libxls-1.6.2
-        
-        # Собираем libxls
-        mkdir build
-        cd build
-        cmake -G "Ninja" -DCMAKE_INSTALL_PREFIX="$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows" ..
-        cmake --build . --config Release
-        cmake --install .
-        
-        # Копируем файлы в системные пути
-        mkdir "C:\libxls\include" -Force
-        mkdir "C:\libxls\lib" -Force
-        copy "..\include\*.h" "C:\libxls\include\"
-        copy "Release\*.lib" "C:\libxls\lib\"
-        copy "Release\*.dll" "C:\libxls\lib\"
-        
-        echo "✅ libxls built and installed"
-        
-    - name: Build application
+    - name: Build application with MSYS2
+      shell: msys2 {0}
       run: |
         mkdir build
         cd build
-        
-        # Создаем файл тулчейна для CMake
-        $toolchainContent = @"
-set(CMAKE_SYSTEM_NAME Windows)
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_CXX_COMPILER g++)
-set(CMAKE_FIND_ROOT_PATH "C:/libxls")
-set(LIBXLS_INCLUDE_DIR "C:/libxls/include")
-set(LIBXLS_LIBRARIES "C:/libxls/lib/xlsreader.lib")
-"@
-        $toolchainContent | Out-File -FilePath "toolchain.cmake" -Encoding ASCII
         
         BUILD_TYPE_FLAG=""
-        if ("${{ inputs.build-type }}") {
+        if [ -n "${{ inputs.build-type }}" ]; then
           BUILD_TYPE_FLAG="-DCMAKE_BUILD_TYPE=${{ inputs.build-type }}"
-        }
+        fi
         
-        cmake -G Ninja $BUILD_TYPE_FLAG -DLIBXLS_INCLUDE_DIR="C:/libxls/include" -DLIBXLS_LIBRARIES="C:/libxls/lib/xlsreader.lib" ..
+        # Сборка с автоматически найденным libxls
+        cmake -G Ninja $BUILD_TYPE_FLAG ..
         ninja
         
     - name: Run Phase 2 verification
-      shell: cmd
+      shell: msys2 {0}
       run: |
         cd build
         echo "🧪 Running Phase 2 verification..."
-        test_datamodels.exe
-        test_gradecalculator.exe
-        test_filesystem.exe
+        ./test_datamodels.exe
+        ./test_gradecalculator.exe
+        ./test_filesystem.exe
         
-    - name: Test demo program
-      shell: cmd
+    - name: Test applications
+      shell: msys2 {0}
       run: |
         cd build
-        echo "🎯 Testing demo program..."
-        bin\demo_datamodels.exe
-        
-    - name: Test main application
-      shell: cmd
-      run: |
-        cd build
-        bin\analytics_app.exe --help
+        echo "🎯 Testing applications..."
+        ./bin/demo_datamodels.exe
+        ./bin/analytics_app.exe --help
         
     - name: Create artifact
       if: ${{ inputs.create-artifact }}
+      shell: cmd
       run: |
-        mkdir -p artifacts
+        mkdir artifacts
         copy build\bin\analytics_app.exe artifacts\
         copy build\bin\demo_datamodels.exe artifacts\
-        copy C:\libxls\lib\*.dll artifacts\  # Копируем DLL зависимости
         Compress-Archive -Path artifacts\* -DestinationPath analytics-app-windows-v0.1.0.zip

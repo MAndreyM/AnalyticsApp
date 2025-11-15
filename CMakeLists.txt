@@ -46,13 +46,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(SKIP_LIBXLS_CHECK "Skip libxls dependency check" OFF)
 
 if(NOT SKIP_LIBXLS_CHECK)
+    # Сначала попробуем найти через pkg-config (Linux)
     find_package(PkgConfig)
     if(PkgConfig_FOUND)
         pkg_check_modules(LIBXLS libxls)
     endif()
 
     if(LIBXLS_FOUND)
-        message(STATUS "✅ Found libxls: ${LIBXLS_VERSION}")
+        message(STATUS "✅ Found libxls via pkg-config: ${LIBXLS_VERSION}")
         message(STATUS "   Include directories: ${LIBXLS_INCLUDE_DIRS}")
         message(STATUS "   Library directories: ${LIBXLS_LIBRARY_DIRS}")
         message(STATUS "   Libraries: ${LIBXLS_LIBRARIES}")
@@ -60,23 +61,54 @@ if(NOT SKIP_LIBXLS_CHECK)
         include_directories(${LIBXLS_INCLUDE_DIRS})
         link_directories(${LIBXLS_LIBRARY_DIRS})
     else()
-        # Альтернативный поиск через find_library
-        find_library(LIBXLS_LIB NAMES xlsreader)
-        find_path(LIBXLS_INCLUDE_DIR NAMES xls.h)
+        # Альтернативный поиск через find_library (Windows/MSYS2 и другие системы)
+        find_library(LIBXLS_LIB 
+            NAMES xlsreader libxlsreader
+            PATHS 
+                /mingw64/lib
+                /usr/lib
+                /usr/local/lib
+                "C:/libxls/lib"
+        )
+        
+        find_path(LIBXLS_INCLUDE_DIR 
+            NAMES xls.h
+            PATHS 
+                /mingw64/include
+                /usr/include
+                /usr/local/include
+                "C:/libxls/include"
+        )
         
         if(LIBXLS_LIB AND LIBXLS_INCLUDE_DIR)
             message(STATUS "✅ Found libxls via find_library")
+            message(STATUS "   Library: ${LIBXLS_LIB}")
+            message(STATUS "   Include dir: ${LIBXLS_INCLUDE_DIR}")
+            
+            set(LIBXLS_FOUND TRUE)
             set(LIBXLS_LIBRARIES ${LIBXLS_LIB})
             set(LIBXLS_INCLUDE_DIRS ${LIBXLS_INCLUDE_DIR})
             include_directories(${LIBXLS_INCLUDE_DIRS})
         else()
             message(WARNING "❌ libxls not found - Excel features will be disabled")
             set(LIBXLS_FOUND FALSE)
+            # Добавляем определение для условной компиляции
+            add_compile_definitions(LIBXLS_DISABLED=1)
         endif()
     endif()
+    
+    # Добавляем определение для условной компиляции
+    if(LIBXLS_FOUND)
+        add_compile_definitions(HAVE_LIBXLS=1)
+        message(STATUS "   Excel parsing: ENABLED")
+    else()
+        add_compile_definitions(HAVE_LIBXLS=0)
+        message(STATUS "   Excel parsing: DISABLED")
+    endif()
 else()
-    message(STATUS "⚠️  Skipping libxls check (Windows build)")
+    message(STATUS "⚠️  Skipping libxls check (manual override)")
     set(LIBXLS_FOUND FALSE)
+    add_compile_definitions(HAVE_LIBXLS=0 LIBXLS_DISABLED=1)
 endif()
 
 # ============================================================================
@@ -150,25 +182,33 @@ endif()
 # ============================================================================
 
 message(STATUS "")
-message(STATUS "🎯 AnalyticsApp Phase 4 Configuration Complete")
+message(STATUS "🎯 AnalyticsApp Configuration Complete")
 message(STATUS "   Version: ${PROJECT_VERSION}")
 message(STATUS "   C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "   Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "   System: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "   LibXLS Found: ${LIBXLS_FOUND}")
+if(LIBXLS_FOUND)
+    message(STATUS "   Excel Parsing: ENABLED")
+else()
+    message(STATUS "   Excel Parsing: DISABLED")
+endif()
 message(STATUS "")
 message(STATUS "📦 Available Targets:")
-message(STATUS "   analytics_app    - Main application")
-message(STATUS "   test_gradecalculator - Grade calculator tests (4 scenarios)")
-message(STATUS "   docs             - Generate documentation")
+message(STATUS "   analytics_app         - Main application")
+message(STATUS "   demo_datamodels       - Data models demonstration") 
+message(STATUS "   demo_directory_scanner - Directory scanner demonstration")
+message(STATUS "   test_gradecalculator  - Grade calculator tests (4 scenarios)")
+message(STATUS "   docs                  - Generate documentation")
 message(STATUS "")
 message(STATUS "🏗️  Project Structure:")
-message(STATUS "   src/DataProcessor/ - Data models and analysis logic")
-message(STATUS "   src/Utils/         - File system utilities")
-message(STATUS "   src/FileProcessor/ - Directory scanning and Excel file processing")
+message(STATUS "   src/DataProcessor/    - Data models and analysis logic")
+message(STATUS "   src/Utils/            - File system utilities")
+message(STATUS "   src/FileProcessor/    - Directory scanning and Excel file processing")
 message(STATUS "")
-message(STATUS "🚀 Phase 4 Features:")
+message(STATUS "🚀 Current Features:")
 message(STATUS "   ✅ Data models with validation")
-message(STATUS "   ✅ Grade calculator with rounding logic")
+message(STATUS "   ✅ Grade calculator with rounding logic") 
 message(STATUS "   ✅ 4 comprehensive test scenarios")
 message(STATUS "   ✅ File system utilities")
 message(STATUS "   ✅ Directory scanner with recursive search")
