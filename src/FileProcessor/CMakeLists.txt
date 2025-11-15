@@ -4,6 +4,7 @@
 set(FILE_PROCESSOR_SOURCES
     ExcelFileFilter.cpp
     DirectoryScanner.cpp
+    ExcelParser.cpp  # ← ДОБАВИТЬ НОВЫЙ ФАЙЛ ДЛЯ БУДУЩЕЙ РЕАЛИЗАЦИИ
 )
 
 # Create FileProcessor as OBJECT library
@@ -19,6 +20,7 @@ target_include_directories(FileProcessor
 target_link_libraries(FileProcessor 
     PUBLIC 
         Utils
+        ${LIBXLS_LIBRARIES}  # ← ДОБАВИТЬ LIBXLS ДЛЯ EXCEL ПАРСИНГА
 )
 
 # Compiler specific settings
@@ -38,4 +40,4 @@ set_target_properties(FileProcessor
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-message(STATUS "FileProcessor module configured - OBJECT library")
+message(STATUS "FileProcessor module configured - OBJECT library with libxls support")

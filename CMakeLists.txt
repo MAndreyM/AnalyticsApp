@@ -38,8 +38,25 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Поиск зависимостей
-#find_package(PkgConfig REQUIRED)
+# ============================================================================
+# ПОИСК ЗАВИСИМОСТЕЙ ДЛЯ EXCEL ПАРСИНГА
+# ============================================================================
+
+# Поиск библиотеки libxls для чтения XLS файлов
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBXLS REQUIRED libxls)
+
+if(LIBXLS_FOUND)
+    message(STATUS "✅ Found libxls: ${LIBXLS_VERSION}")
+    message(STATUS "   Include directories: ${LIBXLS_INCLUDE_DIRS}")
+    message(STATUS "   Library directories: ${LIBXLS_LIBRARY_DIRS}")
+    message(STATUS "   Libraries: ${LIBXLS_LIBRARIES}")
+    
+    include_directories(${LIBXLS_INCLUDE_DIRS})
+    link_directories(${LIBXLS_LIBRARY_DIRS})
+else()
+    message(FATAL_ERROR "❌ libxls not found - required for Excel file parsing")
+endif()
 
 # ============================================================================
 # ПОДКЛЮЧЕНИЕ ИСХОДНЫХ КОДОВ
@@ -112,7 +129,7 @@ endif()
 # ============================================================================
 
 message(STATUS "")
-message(STATUS "🎯 AnalyticsApp Phase 2 Configuration Complete")
+message(STATUS "🎯 AnalyticsApp Phase 4 Configuration Complete")
 message(STATUS "   Version: ${PROJECT_VERSION}")
 message(STATUS "   C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "   Build Type: ${CMAKE_BUILD_TYPE}")
@@ -127,10 +144,12 @@ message(STATUS "   src/DataProcessor/ - Data models and analysis logic")
 message(STATUS "   src/Utils/         - File system utilities")
 message(STATUS "   src/FileProcessor/ - Directory scanning and Excel file processing")
 message(STATUS "")
-message(STATUS "🚀 Phase 2 Features:")
+message(STATUS "🚀 Phase 4 Features:")
 message(STATUS "   ✅ Data models with validation")
 message(STATUS "   ✅ Grade calculator with rounding logic")
 message(STATUS "   ✅ 4 comprehensive test scenarios")
 message(STATUS "   ✅ File system utilities")
 message(STATUS "   ✅ Directory scanner with recursive search")
 message(STATUS "   ✅ Excel file filtering with statistics")
+message(STATUS "   🔄 libxls integration for Excel parsing")
+message(STATUS "")
