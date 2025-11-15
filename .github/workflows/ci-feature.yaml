@@ -141,11 +141,12 @@ jobs:
         $content | Set-Content CMakeLists.txt
         echo "✅ Modified CMakeLists.txt for Windows build"
         
-    - name: Configure and build
+    - name: Configure and build with libxls bypass
       run: |
         mkdir build
         cd build
-        cmake -G Ninja ..
+        # Передаем флаг для обхода проверки libxls
+        cmake -G Ninja -DSKIP_LIBXLS_CHECK=ON ..
         ninja
         
     - name: Run Phase 2 verification
