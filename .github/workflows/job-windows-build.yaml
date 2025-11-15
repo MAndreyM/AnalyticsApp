@@ -34,53 +34,29 @@ jobs:
           automake
           libtool
           wget
+          git
         
-    - name: Find and install libxls
+    - name: Install libxls from source
       shell: msys2 {0}
       run: |
-        echo "🔍 Searching for available libxls packages..."
-        pacman -Ss libxls
+        echo "📦 Installing libxls from source..."
+        cd /tmp
         
-        echo "📦 Installing libxls..."
-        # Пробуем установить libxls из репозиториев
-        if pacman -S --noconfirm mingw-w64-x86_64-libxls 2>/dev/null; then
-          echo "✅ libxls installed from MSYS2 repositories"
-        else
-          echo "⚠️  libxls not found in repositories, building from source..."
-          # Запасной вариант - сборка из исходников
-          cd /tmp
-          wget https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz
-          tar -xzf libxls-1.6.2.tar.gz
-          cd libxls-1.6.2
-          
-          ./configure --prefix=/mingw64
-          make
-          
-          # Устанавливаем вручную
-          mkdir -p /mingw64/include/libxls
-          cp include/libxls/*.h /mingw64/include/libxls/
-          cp include/xls.h /mingw64/include/
-          cp src/.libs/libxlsreader.a /mingw64/lib/
-          cp src/.libs/libxlsreader.dll.a /mingw64/lib/
-          cp src/.libs/libxlsreader-2.dll /mingw64/bin/
-          
-          # Создаем pkg-config файл
-          cat > /mingw64/lib/pkgconfig/libxls.pc << EOF
-          prefix=/mingw64
-          exec_prefix=\${prefix}
-          libdir=\${exec_prefix}/lib
-          includedir=\${prefix}/include
-          
-          Name: libxls
-          Description: Library for reading Excel XLS files
-          Version: 1.6.2
-          Libs: -L\${libdir} -lxlsreader
-          Cflags: -I\${includedir}
-          EOF
-          echo "✅ libxls built from source"
-        fi
+        # Клонируем репозиторий libxls
+        git clone https://github.com/libxls/libxls.git
+        cd libxls
         
-        echo "✅ Verification:"
+        # Создаем директорию для сборки и конфигурируем
+        mkdir build && cd build
+        ../configure --prefix=/mingw64
+        
+        # Собираем и устанавливаем
+        make
+        make install
+        
+        echo "✅ libxls successfully installed from source"
+        
+        echo "🔍 Verification:"
         pkg-config --exists libxls && echo "✅ pkg-config can find libxls"
         find /mingw64 -name "*xls*" -type f
         
