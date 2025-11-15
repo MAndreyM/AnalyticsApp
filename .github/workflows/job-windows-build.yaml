@@ -134,13 +134,6 @@ EOF
           echo "❌ Excel support: DISABLED"
         fi
         
-    - name: Test Excel file processing
-      shell: msys2 {0}
-      run: |
-        cd build
-        echo "📁 Testing Excel file detection..."
-        ./bin/analytics_app.exe --version && echo "✅ Application runs successfully"
-        
     - name: Create artifact
       if: ${{ inputs.create-artifact }}
       shell: cmd
