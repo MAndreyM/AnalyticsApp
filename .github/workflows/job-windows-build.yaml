@@ -34,10 +34,10 @@ jobs:
           libtool
           wget
         
-    - name: Build libxls from source in MSYS2
+    - name: Build libxls from source (C library only)
       shell: msys2 {0}
       run: |
-        echo "📦 Building libxls from source..."
+        echo "📦 Building libxls C library from source..."
         
         # Скачиваем и собираем libxls
         cd /tmp
@@ -45,12 +45,19 @@ jobs:
         tar -xzf libxls-1.6.2.tar.gz
         cd libxls-1.6.2
         
-        # Собираем libxls
+        # Собираем только C библиотеку, пропускаем C++ часть
         ./configure --prefix=/mingw64
-        make
-        make install
+        make -C src
         
-        echo "✅ libxls built and installed to /mingw64"
+        # Устанавливаем вручную только нужные файлы
+        mkdir -p /mingw64/include
+        mkdir -p /mingw64/lib
+        cp include/*.h /mingw64/include/
+        cp src/.libs/libxlsreader.a /mingw64/lib/
+        cp src/.libs/libxlsreader.dll.a /mingw64/lib/
+        cp src/.libs/libxlsreader-2.dll /mingw64/bin/ 2>/dev/null || true
+        
+        echo "✅ libxls C library installed to /mingw64"
         
         # Проверяем установку
         ls -la /mingw64/include/xls.h
@@ -105,4 +112,6 @@ jobs:
         mkdir artifacts
         copy build\bin\analytics_app.exe artifacts\
         copy build\bin\demo_datamodels.exe artifacts\
+        # Копируем DLL зависимости если есть
+        copy C:\msys64\mingw64\bin\libxlsreader*.dll artifacts\ 2>nul || echo "No libxls DLLs found"
         Compress-Archive -Path artifacts\* -DestinationPath analytics-app-windows-v0.1.0.zip
