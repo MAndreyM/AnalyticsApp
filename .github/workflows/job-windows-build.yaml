@@ -34,11 +34,12 @@ jobs:
           automake
           libtool
           wget
+          patch
         
-    - name: Install libxls from stable release v1.6.3
+    - name: Install libxls v1.6.3 with spawnv patch
       shell: msys2 {0}
       run: |
-        echo "📦 Installing libxls v1.6.3 from stable release..."
+        echo "📦 Installing libxls v1.6.3 with spawnv patch..."
         cd /tmp
         
         # Скачиваем стабильный релиз версии 1.6.3
@@ -46,9 +47,14 @@ jobs:
         tar -xzf libxls-1.6.3.tar.gz
         cd libxls-1.6.3
         
-        # Конфигурируем и собираем
+        # Применяем патч для исправления конфликта spawnv
+        echo "🔧 Applying spawnv conflict patch..."
+        sed -i 's/-D_spawnv=spawnv//g' configure
+        sed -i 's/"_spawnv=spawnv"//g' configure
+        
+        # Конфигурируем без проблемного флага
         echo "⚙️  Configuring libxls..."
-        ./configure --prefix=/mingw64
+        ./configure --prefix=/mingw64 CFLAGS="-g -O2" CXXFLAGS="-g -O2"
         
         echo "🔨 Building libxls..."
         make
@@ -56,7 +62,7 @@ jobs:
         echo "📥 Installing libxls..."
         make install
         
-        echo "✅ libxls v1.6.3 successfully installed"
+        echo "✅ libxls v1.6.3 successfully installed with patch"
         
         echo "🔍 Verification:"
         pkg-config --exists libxls && echo "✅ pkg-config can find libxls" || echo "⚠️  pkg-config cannot find libxls"
@@ -128,7 +134,7 @@ jobs:
         echo "🏗️  Windows Build Report"
         echo "========================"
         gcc --version | head -1
-        echo "✅ libxls v1.6.3: INSTALLED"
+        echo "✅ libxls v1.6.3: INSTALLED (with spawnv patch)"
         echo "✅ Application: COMPILED"
         echo "✅ Tests: PASSED"
         echo "✅ Excel Parsing: ENABLED"
