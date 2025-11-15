@@ -35,31 +35,66 @@ jobs:
           libtool
           wget
         
-    - name: Build and install libxls properly
+    - name: Build and install libxls 1.6.3
       shell: msys2 {0}
       run: |
-        echo "📦 Building libxls with available GCC..."
+        echo "📦 Building libxls 1.6.3 with available GCC..."
         
         # Проверяем версию GCC
         gcc --version
         
         cd /tmp
-        wget https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz
-        tar -xzf libxls-1.6.2.tar.gz
-        cd libxls-1.6.2
-        
-        # Создаем правильную структуру папок для заголовков
-        mkdir -p libxls
+        wget https://github.com/libxls/libxls/releases/download/v1.6.3/libxls-1.6.3.tar.gz
+        tar -xzf libxls-1.6.3.tar.gz
+        cd libxls-1.6.3
         
         # Исправляем конфигурацию для правильной установки
         ./configure --prefix=/mingw64
         
-        # Собираем и устанавливаем
-        make
-        make install
+        # Собираем только C часть, пропускаем C++ если есть ошибки
+        echo "🔨 Building C library..."
+        make -C src libxlsreader.la
+        make -C src xls2csv.exe
+        
+        # Пробуем собрать C++ часть, но не прерываемся при ошибке
+        echo "🔨 Attempting to build C++ part..."
+        make -C cplusplus 2>/dev/null || echo "⚠️  C++ part build failed, continuing with C library only"
+        
+        # Устанавливаем вручную
+        echo "📥 Installing to /mingw64..."
+        mkdir -p /mingw64/include/libxls
+        mkdir -p /mingw64/lib/pkgconfig
+        mkdir -p /mingw64/bin
+        
+        # Копируем заголовочные файлы
+        cp include/libxls/*.h /mingw64/include/libxls/
+        cp include/xls.h /mingw64/include/
+        
+        # Копируем библиотеки
+        cp src/.libs/libxlsreader.a /mingw64/lib/
+        cp src/.libs/libxlsreader.dll.a /mingw64/lib/
+        if [ -f "src/.libs/libxlsreader-2.dll" ]; then
+            cp src/.libs/libxlsreader-2.dll /mingw64/bin/
+        elif [ -f "src/.libs/libxlsreader.dll" ]; then
+            cp src/.libs/libxlsreader.dll /mingw64/bin/
+        fi
+        
+        # Создаем pkg-config файл вручную
+        cat > /mingw64/lib/pkgconfig/libxls.pc << EOF
+        prefix=/mingw64
+        exec_prefix=\${prefix}
+        libdir=\${exec_prefix}/lib
+        includedir=\${prefix}/include
+        
+        Name: libxls
+        Description: Library for reading Excel XLS files
+        Version: 1.6.3
+        Libs: -L\${libdir} -lxlsreader
+        Cflags: -I\${includedir}
+        EOF
         
         # Проверяем установку
-        echo "✅ libxls installation check:"
+        echo "✅ libxls 1.6.3 installation check:"
         find /mingw64 -name "*xls*" -type f
         pkg-config --exists libxls && echo "✅ pkg-config can find libxls"
         
@@ -129,7 +164,7 @@ jobs:
         echo "🏗️  Windows Build Report"
         echo "========================"
         gcc --version | head -1
-        echo "✅ libxls: INSTALLED"
+        echo "✅ libxls: INSTALLED (v1.6.3)"
         echo "✅ Application: COMPILED"
         echo "✅ Tests: PASSED"
         echo "✅ Excel Parsing: ENABLED"
