@@ -20,7 +20,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup MSYS2 and install libxls
+    - name: Setup MSYS2 and install base dependencies
       uses: msys2/setup-msys2@v2
       with:
         update: true
@@ -28,9 +28,31 @@ jobs:
           mingw-w64-x86_64-ninja
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-libxls
+          mingw-w64-x86_64-git
+          make
+          autoconf
+          automake
+          libtool
         
-    - name: Build application with MSYS2
+    - name: Build libxls from source in MSYS2
+      shell: msys2 {0}
+      run: |
+        echo "📦 Building libxls from source..."
+        
+        # Скачиваем и собираем libxls
+        cd /tmp
+        wget https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz
+        tar -xzf libxls-1.6.2.tar.gz
+        cd libxls-1.6.2
+        
+        # Собираем libxls
+        ./configure --prefix=/mingw64
+        make
+        make install
+        
+        echo "✅ libxls built and installed to /mingw64"
+        
+    - name: Build application
       shell: msys2 {0}
       run: |
         mkdir build
@@ -41,26 +63,32 @@ jobs:
           BUILD_TYPE_FLAG="-DCMAKE_BUILD_TYPE=${{ inputs.build-type }}"
         fi
         
-        # Сборка с автоматически найденным libxls
         cmake -G Ninja $BUILD_TYPE_FLAG ..
         ninja
         
-    - name: Run Phase 2 verification
+    - name: Run tests
       shell: msys2 {0}
       run: |
         cd build
-        echo "🧪 Running Phase 2 verification..."
+        echo "🧪 Running tests..."
         ./test_datamodels.exe
         ./test_gradecalculator.exe
         ./test_filesystem.exe
         
-    - name: Test applications
+    - name: Test demo programs
       shell: msys2 {0}
       run: |
         cd build
-        echo "🎯 Testing applications..."
+        echo "🎯 Testing demo programs..."
         ./bin/demo_datamodels.exe
         ./bin/analytics_app.exe --help
+        
+    - name: Verify Excel support
+      shell: msys2 {0}
+      run: |
+        cd build
+        echo "📊 Verifying Excel support..."
+        ./bin/analytics_app.exe --help | grep -i excel && echo "✅ Excel support: ENABLED" || echo "❌ Excel support: DISABLED"
         
     - name: Create artifact
       if: ${{ inputs.create-artifact }}
