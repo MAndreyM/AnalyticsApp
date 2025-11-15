@@ -51,14 +51,9 @@ jobs:
         # Исправляем конфигурацию для правильной установки
         ./configure --prefix=/mingw64
         
-        # Собираем только C часть, пропускаем C++ если есть ошибки
-        echo "🔨 Building C library..."
-        make -C src libxlsreader.la
-        make -C src xls2csv.exe
-        
-        # Пробуем собрать C++ часть, но не прерываемся при ошибке
-        echo "🔨 Attempting to build C++ part..."
-        make -C cplusplus 2>/dev/null || echo "⚠️  C++ part build failed, continuing with C library only"
+        # В версии 1.6.3 используем обычный make для сборки C библиотеки
+        echo "🔨 Building library..."
+        make
         
         # Устанавливаем вручную
         echo "📥 Installing to /mingw64..."
@@ -70,9 +65,13 @@ jobs:
         cp include/libxls/*.h /mingw64/include/libxls/
         cp include/xls.h /mingw64/include/
         
-        # Копируем библиотеки
-        cp src/.libs/libxlsreader.a /mingw64/lib/
-        cp src/.libs/libxlsreader.dll.a /mingw64/lib/
+        # Копируем библиотеки из правильных мест
+        if [ -f "src/.libs/libxlsreader.a" ]; then
+            cp src/.libs/libxlsreader.a /mingw64/lib/
+        fi
+        if [ -f "src/.libs/libxlsreader.dll.a" ]; then
+            cp src/.libs/libxlsreader.dll.a /mingw64/lib/
+        fi
         if [ -f "src/.libs/libxlsreader-2.dll" ]; then
             cp src/.libs/libxlsreader-2.dll /mingw64/bin/
         elif [ -f "src/.libs/libxlsreader.dll" ]; then
