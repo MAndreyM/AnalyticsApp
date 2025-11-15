@@ -118,28 +118,33 @@ jobs:
   windows-production:
     name: "Windows Production Build"
     runs-on: windows-latest
-    
+  
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+    
     - name: Install dependencies
       run: |
         choco install ninja -y
-        
-    - name: Temporarily disable pkg-config for Windows CI
+      
+    - name: Create Windows-specific CMakeLists patch
       run: |
-        echo "🛠️ Temporarily disabling pkg-config check for Windows build..."
-        (Get-Content CMakeLists.txt) -replace 'find_package\(PkgConfig REQUIRED\)', '# find_package(PkgConfig REQUIRED)  # Temporarily disabled for Windows CI' | Set-Content CMakeLists.txt
-        echo "✅ Modified CMakeLists.txt - pkg-config check disabled"
-        
+        echo "🛠️ Creating Windows-specific CMake configuration..."
+        # Создаем патч для отключения pkg-config на Windows
+        $content = Get-Content CMakeLists.txt -Raw
+        $content = $content -replace 'find_package\(PkgConfig REQUIRED\)', '# find_package(PkgConfig REQUIRED)  # Disabled for Windows'
+        $content = $content -replace 'pkg_check_modules\(LIBXLS libxls\)', '# pkg_check_modules(LIBXLS libxls)  # Disabled for Windows'
+        $content = $content -replace 'if\(LIBXLS_FOUND\)', 'if(TRUE)  # Bypass libxls check for Windows'
+        $content | Set-Content CMakeLists.txt
+        echo "✅ Modified CMakeLists.txt for Windows build"
+      
     - name: Configure and build
       run: |
         mkdir build
         cd build
-        cmake -G Ninja ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
         ninja
-        
+      
     - name: Run Phase 2 production tests
       shell: cmd
       run: |

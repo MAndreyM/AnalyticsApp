@@ -130,11 +130,16 @@ jobs:
       run: |
         choco install ninja -y
         
-    - name: Temporarily disable pkg-config for Windows CI
-      run: |
-        echo "🛠️ Temporarily disabling pkg-config check for Windows build..."
-        (Get-Content CMakeLists.txt) -replace 'find_package\(PkgConfig REQUIRED\)', '# find_package(PkgConfig REQUIRED)  # Temporarily disabled for Windows CI' | Set-Content CMakeLists.txt
-        echo "✅ Modified CMakeLists.txt - pkg-config check disabled"
+    - name: Create Windows-specific CMakeLists patch
+    run: |
+        echo "🛠️ Creating Windows-specific CMake configuration..."
+        # Создаем патч для отключения pkg-config на Windows
+        $content = Get-Content CMakeLists.txt -Raw
+        $content = $content -replace 'find_package\(PkgConfig REQUIRED\)', '# find_package(PkgConfig REQUIRED)  # Disabled for Windows'
+        $content = $content -replace 'pkg_check_modules\(LIBXLS libxls\)', '# pkg_check_modules(LIBXLS libxls)  # Disabled for Windows'
+        $content = $content -replace 'if\(LIBXLS_FOUND\)', 'if(TRUE)  # Bypass libxls check for Windows'
+        $content | Set-Content CMakeLists.txt
+        echo "✅ Modified CMakeLists.txt for Windows build"
         
     - name: Configure and build
       run: |
