@@ -33,23 +33,18 @@ jobs:
           autoconf
           automake
           libtool
-          autoconf-archive
           wget
-          git
         
-    - name: Install libxls from source
+    - name: Install libxls from stable release v1.6.3
       shell: msys2 {0}
       run: |
-        echo "📦 Installing libxls from source..."
+        echo "📦 Installing libxls v1.6.3 from stable release..."
         cd /tmp
         
-        # Клонируем репозиторий libxls
-        git clone https://github.com/libxls/libxls.git
-        cd libxls
-        
-        # Генерируем configure скрипт (для git версии)
-        echo "🔄 Running autogen.sh..."
-        ./autogen.sh
+        # Скачиваем стабильный релиз версии 1.6.3
+        wget https://github.com/libxls/libxls/releases/download/v1.6.3/libxls-1.6.3.tar.gz
+        tar -xzf libxls-1.6.3.tar.gz
+        cd libxls-1.6.3
         
         # Конфигурируем и собираем
         echo "⚙️  Configuring libxls..."
@@ -61,7 +56,7 @@ jobs:
         echo "📥 Installing libxls..."
         make install
         
-        echo "✅ libxls successfully installed from source"
+        echo "✅ libxls v1.6.3 successfully installed"
         
         echo "🔍 Verification:"
         pkg-config --exists libxls && echo "✅ pkg-config can find libxls" || echo "⚠️  pkg-config cannot find libxls"
@@ -124,6 +119,7 @@ jobs:
         copy C:\msys64\mingw64\bin\libxlsreader*.dll artifacts\ 2>nul || echo "No libxls DLLs to copy"
         copy C:\msys64\mingw64\bin\libiconv*.dll artifacts\ 2>nul || echo "No iconv DLLs to copy"
         copy C:\msys64\mingw64\bin\libwinpthread*.dll artifacts\ 2>nul || echo "No pthread DLLs to copy"
+        copy C:\msys64\mingw64\bin\libgcc_s_seh*.dll artifacts\ 2>nul || echo "No libgcc DLLs to copy"
         Compress-Archive -Path artifacts\* -DestinationPath analytics-app-windows-v0.1.0.zip
         
     - name: Windows build report
@@ -132,7 +128,7 @@ jobs:
         echo "🏗️  Windows Build Report"
         echo "========================"
         gcc --version | head -1
-        echo "✅ libxls: INSTALLED"
+        echo "✅ libxls v1.6.3: INSTALLED"
         echo "✅ Application: COMPILED"
         echo "✅ Tests: PASSED"
         echo "✅ Excel Parsing: ENABLED"
