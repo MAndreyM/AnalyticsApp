@@ -33,6 +33,7 @@ jobs:
           autoconf
           automake
           libtool
+          autoconf-archive
           wget
           git
         
@@ -46,19 +47,25 @@ jobs:
         git clone https://github.com/libxls/libxls.git
         cd libxls
         
-        # Создаем директорию для сборки и конфигурируем
-        mkdir build && cd build
-        ../configure --prefix=/mingw64
+        # Генерируем configure скрипт (для git версии)
+        echo "🔄 Running autogen.sh..."
+        ./autogen.sh
         
-        # Собираем и устанавливаем
+        # Конфигурируем и собираем
+        echo "⚙️  Configuring libxls..."
+        ./configure --prefix=/mingw64
+        
+        echo "🔨 Building libxls..."
         make
+        
+        echo "📥 Installing libxls..."
         make install
         
         echo "✅ libxls successfully installed from source"
         
         echo "🔍 Verification:"
-        pkg-config --exists libxls && echo "✅ pkg-config can find libxls"
-        find /mingw64 -name "*xls*" -type f
+        pkg-config --exists libxls && echo "✅ pkg-config can find libxls" || echo "⚠️  pkg-config cannot find libxls"
+        find /mingw64 -name "*xls*" -type f | head -10
         
     - name: Build application
       shell: msys2 {0}
@@ -72,6 +79,7 @@ jobs:
         fi
         
         export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:$PKG_CONFIG_PATH"
+        export PATH="/mingw64/bin:$PATH"
         
         cmake -G Ninja $BUILD_TYPE_FLAG ..
         ninja
