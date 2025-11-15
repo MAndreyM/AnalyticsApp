@@ -24,23 +24,53 @@ jobs:
       run: |
         choco install ninja -y
         
-    - name: Setup vcpkg and install libxls
+    - name: Download and build libxls from source
       run: |
-        echo "📦 Setting up vcpkg and installing libxls..."
-        git clone https://github.com/Microsoft/vcpkg.git
-        .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install libxls:x64-windows
-        echo "✅ libxls installed via vcpkg"
+        echo "📦 Downloading and building libxls from source..."
         
-    - name: Build with vcpkg
+        # Скачиваем исходники libxls
+        curl -L -o libxls-1.6.2.tar.gz https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz
+        tar -xzf libxls-1.6.2.tar.gz
+        cd libxls-1.6.2
+        
+        # Собираем libxls
+        mkdir build
+        cd build
+        cmake -G "Ninja" -DCMAKE_INSTALL_PREFIX="$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows" ..
+        cmake --build . --config Release
+        cmake --install .
+        
+        # Копируем файлы в системные пути
+        mkdir "C:\libxls\include" -Force
+        mkdir "C:\libxls\lib" -Force
+        copy "..\include\*.h" "C:\libxls\include\"
+        copy "Release\*.lib" "C:\libxls\lib\"
+        copy "Release\*.dll" "C:\libxls\lib\"
+        
+        echo "✅ libxls built and installed"
+        
+    - name: Build application
       run: |
         mkdir build
         cd build
+        
+        # Создаем файл тулчейна для CMake
+        $toolchainContent = @"
+set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_FIND_ROOT_PATH "C:/libxls")
+set(LIBXLS_INCLUDE_DIR "C:/libxls/include")
+set(LIBXLS_LIBRARIES "C:/libxls/lib/xlsreader.lib")
+"@
+        $toolchainContent | Out-File -FilePath "toolchain.cmake" -Encoding ASCII
+        
         BUILD_TYPE_FLAG=""
-        if [ -n "${{ inputs.build-type }}" ]; then
+        if ("${{ inputs.build-type }}") {
           BUILD_TYPE_FLAG="-DCMAKE_BUILD_TYPE=${{ inputs.build-type }}"
-        fi
-        cmake -G Ninja $BUILD_TYPE_FLAG -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        }
+        
+        cmake -G Ninja $BUILD_TYPE_FLAG -DLIBXLS_INCLUDE_DIR="C:/libxls/include" -DLIBXLS_LIBRARIES="C:/libxls/lib/xlsreader.lib" ..
         ninja
         
     - name: Run Phase 2 verification
@@ -69,6 +99,7 @@ jobs:
       if: ${{ inputs.create-artifact }}
       run: |
         mkdir -p artifacts
-        cp build/bin/analytics_app.exe artifacts/
-        cp build/bin/demo_datamodels.exe artifacts/
-        Compress-Archive -Path artifacts/* -DestinationPath analytics-app-windows-v0.1.0.zip
+        copy build\bin\analytics_app.exe artifacts\
+        copy build\bin\demo_datamodels.exe artifacts\
+        copy C:\libxls\lib\*.dll artifacts\  # Копируем DLL зависимости
+        Compress-Archive -Path artifacts\* -DestinationPath analytics-app-windows-v0.1.0.zip
