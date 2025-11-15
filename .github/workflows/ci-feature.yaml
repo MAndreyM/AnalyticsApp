@@ -131,7 +131,7 @@ jobs:
         choco install ninja -y
         
     - name: Create Windows-specific CMakeLists patch
-    run: |
+      run: |
         echo "🛠️ Creating Windows-specific CMake configuration..."
         # Создаем патч для отключения pkg-config на Windows
         $content = Get-Content CMakeLists.txt -Raw
