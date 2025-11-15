@@ -1,0 +1,41 @@
+name: "Alt Linux 10 Build"
+runs-on: ubuntu-latest
+container:
+  image: mandrm/altlinux-ci-analytics:alt10
+
+steps:
+- name: Checkout code
+  uses: actions/checkout@v4
+  
+- name: Build on Alt Linux 10
+  run: |
+    echo "🔨 Building on Alt Linux 10..."
+    mkdir build && cd build
+    cmake -G Ninja ${{ inputs.build-type ? '-DCMAKE_BUILD_TYPE=' + inputs.build-type : '' }} ..
+    ninja
+    
+- name: Run Phase 2 verification
+  run: |
+    echo "🧪 Running Phase 2 verification..."
+    cd build
+    ./test_datamodels
+    ./test_gradecalculator
+    ./test_filesystem
+    
+- name: Test binary on Alt Linux 10
+  run: |
+    cd build
+    ./bin/analytics_app --help
+    
+- name: Alt Linux 10 environment info
+  run: |
+    echo "✅ Alt Linux 10 Environment:"
+    cat /etc/os-release | grep -E "^(NAME|VERSION)="
+
+- name: Create artifact
+  if: inputs.create-artifact
+  run: |
+    mkdir -p artifacts
+    cp build/bin/analytics_app artifacts/
+    cp build/bin/demo_datamodels artifacts/
+    tar -czf analytics-app-altlinux-10-v0.1.0.tar.gz -C artifacts .
