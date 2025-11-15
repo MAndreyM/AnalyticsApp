@@ -28,13 +28,14 @@ jobs:
           mingw-w64-x86_64-ninja
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-pkg-config
           make
           autoconf
           automake
           libtool
           wget
         
-    - name: Build libxls with available GCC
+    - name: Build and install libxls properly
       shell: msys2 {0}
       run: |
         echo "📦 Building libxls with available GCC..."
@@ -47,38 +48,20 @@ jobs:
         tar -xzf libxls-1.6.2.tar.gz
         cd libxls-1.6.2
         
-        # Пробуем собрать без C++ части
+        # Создаем правильную структуру папок для заголовков
+        mkdir -p libxls
+        
+        # Исправляем конфигурацию для правильной установки
         ./configure --prefix=/mingw64
         
-        # Собираем только основные цели
-        make src/libxlsreader.la || echo "C library build completed"
-        make src/xls2csv || echo "xls2csv build completed"
-        
-        # Пропускаем C++ часть если есть ошибки
-        make cplusplus/main.o 2>/dev/null || echo "Skipping C++ part"
-        
-        # Устанавливаем вручную
-        mkdir -p /mingw64/include
-        mkdir -p /mingw64/lib
-        cp include/*.h /mingw64/include/
-        
-        # Копируем собранные библиотеки
-        if [ -f "src/.libs/libxlsreader.a" ]; then
-            cp src/.libs/libxlsreader.a /mingw64/lib/
-        fi
-        if [ -f "src/.libs/libxlsreader.dll.a" ]; then
-            cp src/.libs/libxlsreader.dll.a /mingw64/lib/
-        fi
-        if [ -f "src/.libs/libxlsreader-2.dll" ]; then
-            mkdir -p /mingw64/bin
-            cp src/.libs/libxlsreader-2.dll /mingw64/bin/
-        fi
-        
-        echo "✅ libxls installed to /mingw64"
+        # Собираем и устанавливаем
+        make
+        make install
         
         # Проверяем установку
-        ls -la /mingw64/include/xls.h
-        find /mingw64 -name "*xlsreader*" -type f
+        echo "✅ libxls installation check:"
+        find /mingw64 -name "*xls*" -type f
+        pkg-config --exists libxls && echo "✅ pkg-config can find libxls"
         
     - name: Build application
       shell: msys2 {0}
@@ -90,6 +73,9 @@ jobs:
         if [ -n "${{ inputs.build-type }}" ]; then
           BUILD_TYPE_FLAG="-DCMAKE_BUILD_TYPE=${{ inputs.build-type }}"
         fi
+        
+        # Принудительно указываем путь к pkg-config
+        export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:$PKG_CONFIG_PATH"
         
         cmake -G Ninja $BUILD_TYPE_FLAG ..
         ninja
