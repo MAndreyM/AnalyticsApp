@@ -1,0 +1,54 @@
+name: "Alt Linux Latest Build"
+
+on:
+  workflow_call:
+    inputs:
+      build-type:
+        required: false
+        type: string
+        default: ""
+      create-artifact:
+        required: false
+        type: boolean
+        default: false
+
+runs-on: ubuntu-latest
+container:
+  image: mandrm/altlinux-ci-analytics:latest
+
+steps:
+- name: Checkout code
+  uses: actions/checkout@v4
+  
+- name: Build on Alt Linux Latest
+  run: |
+    echo "🔨 Building on Alt Linux Latest..."
+    mkdir build && cd build
+    cmake -G Ninja ${{ inputs.build-type && format('-DCMAKE_BUILD_TYPE={0}', inputs.build-type) }} ..
+    ninja
+    
+- name: Run Phase 2 verification
+  run: |
+    echo "🧪 Running Phase 2 verification..."
+    cd build
+    ./test_datamodels
+    ./test_gradecalculator
+    ./test_filesystem
+    
+- name: Test binary on Alt Linux
+  run: |
+    cd build
+    ./bin/analytics_app --help
+    
+- name: Alt Linux environment info
+  run: |
+    echo "✅ Alt Linux Latest Environment:"
+    cat /etc/os-release | grep -E "^(NAME|VERSION)="
+
+- name: Create artifact
+  if: inputs.create-artifact
+  run: |
+    mkdir -p artifacts
+    cp build/bin/analytics_app artifacts/
+    cp build/bin/demo_datamodels artifacts/
+    tar -czf analytics-app-altlinux-latest-v0.1.0.tar.gz -C artifacts .

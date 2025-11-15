@@ -8,16 +8,17 @@ on:
 
 jobs:
   redos-build:
-    uses: ./.github/workflows/jobs/redos-build.yaml
+    uses: ./.github/workflows/job-redos-build.yaml
 
   altlinux-latest-build:
-    uses: ./.github/workflows/jobs/altlinux-latest-build.yaml
+    uses: ./.github/workflows/job-altlinux-latest-build.yaml
 
   altlinux-10-build:
-    uses: ./.github/workflows/jobs/altlinux-10-build.yaml
+    uses: ./.github/workflows/job-altlinux-10-build.yaml
 
   windows-build:
-    uses: ./.github/workflows/jobs/windows-build.yaml
+    uses: ./.github/workflows/job-windows-build.yaml
 
   feature-branch-report:
-    uses: ./.github/workflows/reports/feature-report.yaml
+    uses: ./.github/workflows/report-feature-branch.yaml
+    needs: [redos-build, altlinux-latest-build, altlinux-10-build, windows-build]

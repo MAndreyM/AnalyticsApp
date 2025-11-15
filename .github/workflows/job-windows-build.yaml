@@ -1,0 +1,68 @@
+name: "Windows Build"
+
+on:
+  workflow_call:
+    inputs:
+      build-type:
+        required: false
+        type: string
+        default: ""
+      create-artifact:
+        required: false
+        type: boolean
+        default: false
+
+runs-on: windows-latest
+
+steps:
+- name: Checkout code
+  uses: actions/checkout@v4
+  
+- name: Install dependencies
+  run: |
+    choco install ninja -y
+    
+- name: Setup vcpkg and install libxls
+  run: |
+    echo "📦 Setting up vcpkg and installing libxls..."
+    git clone https://github.com/Microsoft/vcpkg.git
+    .\vcpkg\bootstrap-vcpkg.bat
+    .\vcpkg\vcpkg install libxls:x64-windows
+    echo "✅ libxls installed via vcpkg"
+    
+- name: Build with vcpkg
+  run: |
+    mkdir build
+    cd build
+    cmake -G Ninja ${{ inputs.build-type && format('-DCMAKE_BUILD_TYPE={0}', inputs.build-type) }} -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+    ninja
+    
+- name: Run Phase 2 verification
+  shell: cmd
+  run: |
+    cd build
+    echo "🧪 Running Phase 2 verification..."
+    test_datamodels.exe
+    test_gradecalculator.exe
+    test_filesystem.exe
+    
+- name: Test demo program
+  shell: cmd
+  run: |
+    cd build
+    echo "🎯 Testing demo program..."
+    bin\demo_datamodels.exe
+    
+- name: Test main application
+  shell: cmd
+  run: |
+    cd build
+    bin\analytics_app.exe --help
+    
+- name: Create artifact
+  if: inputs.create-artifact
+  run: |
+    mkdir -p artifacts
+    cp build/bin/analytics_app.exe artifacts/
+    cp build/bin/demo_datamodels.exe artifacts/
+    Compress-Archive -Path artifacts/* -DestinationPath analytics-app-windows-v0.1.0.zip

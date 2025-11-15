@@ -8,28 +8,29 @@ on:
 
 jobs:
   redos-production:
-    uses: ./.github/workflows/jobs/redos-build.yaml
+    uses: ./.github/workflows/job-redos-build.yaml
     with:
       build-type: Release
       create-artifact: true
 
   altlinux-latest-production:
-    uses: ./.github/workflows/jobs/altlinux-latest-build.yaml
+    uses: ./.github/workflows/job-altlinux-latest-build.yaml
     with:
       build-type: Release
       create-artifact: true
 
   altlinux-10-production:
-    uses: ./.github/workflows/jobs/altlinux-10-build.yaml
+    uses: ./.github/workflows/job-altlinux-10-build.yaml
     with:
       build-type: Release
       create-artifact: true
 
   windows-production:
-    uses: ./.github/workflows/jobs/windows-build.yaml
+    uses: ./.github/workflows/job-windows-build.yaml
     with:
       build-type: Release
       create-artifact: true
 
   compatibility-report:
-    uses: ./.github/workflows/reports/production-report.yaml
+    uses: ./.github/workflows/report-production.yaml
+    needs: [redos-production, altlinux-latest-production, altlinux-10-production, windows-production]
