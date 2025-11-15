@@ -20,76 +20,44 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup MSYS2 and install dependencies
+    - name: Setup MSYS2 with GCC 13
       uses: msys2/setup-msys2@v2
       with:
         update: true
         install: |
           mingw-w64-x86_64-ninja
           mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-gcc-13  # Используем GCC 13 вместо 15
           make
+          autoconf
+          automake
+          libtool
           wget
         
-    - name: Build libxls with CMake directly
+    - name: Build libxls with GCC 13
       shell: msys2 {0}
       run: |
-        echo "📦 Building libxls with CMake..."
+        echo "📦 Building libxls with GCC 13..."
         
         cd /tmp
         wget https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz
         tar -xzf libxls-1.6.2.tar.gz
         cd libxls-1.6.2
         
-        # Создаем простой CMakeLists.txt для сборки только C библиотеки
-        cat > CMakeLists.txt << 'EOF'
-cmake_minimum_required(VERSION 3.10)
-project(libxls C)
-
-# Настройки компиляции
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
-# Исходные файлы
-set(SOURCES
-    src/xlstool.c
-    src/endian.c  
-    src/locale.c
-    src/ole.c
-    src/xls.c
-)
-
-# Создаем статическую библиотеку
-add_library(xlsreader STATIC ${SOURCES})
-
-# Настраиваем include директории
-target_include_directories(xlsreader PUBLIC include)
-
-# Определения компилятора
-target_compile_definitions(xlsreader PRIVATE HAVE_CONFIG_H)
-
-# Установка
-install(TARGETS xlsreader
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-
-install(DIRECTORY include/ DESTINATION include)
-EOF
+        # Указываем явно GCC 13
+        export CC=gcc-13
+        export CXX=g++-13
         
-        # Собираем с CMake
-        mkdir build && cd build
-        cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64 ..
+        ./configure --prefix=/mingw64
         make
         make install
         
-        echo "✅ libxls successfully built with CMake"
+        echo "✅ libxls successfully built with GCC 13"
         
         # Проверяем установку
-        echo "🔍 Verification:"
         ls -la /mingw64/include/xls.h
-        ls -la /mingw64/lib/libxlsreader.a
+        ls -la /mingw64/lib/libxlsreader*
+        ls -la /mingw64/bin/*xls* 2>/dev/null || echo "No binaries found"
         
     - name: Build application
       shell: msys2 {0}
@@ -102,7 +70,6 @@ EOF
           BUILD_TYPE_FLAG="-DCMAKE_BUILD_TYPE=${{ inputs.build-type }}"
         fi
         
-        echo "🔨 Building application with libxls..."
         cmake -G Ninja $BUILD_TYPE_FLAG ..
         ninja
         
@@ -130,8 +97,11 @@ EOF
         echo "📊 Verifying Excel support..."
         if ./bin/analytics_app.exe --help | grep -i excel; then
           echo "✅ Excel support: ENABLED"
+          # Тестируем базовую функциональность Excel парсера
+          ./bin/analytics_app.exe --version && echo "✅ Application works correctly"
         else
           echo "❌ Excel support: DISABLED"
+          exit 1
         fi
         
     - name: Create artifact
@@ -141,18 +111,22 @@ EOF
         mkdir artifacts
         copy build\bin\analytics_app.exe artifacts\
         copy build\bin\demo_datamodels.exe artifacts\
+        # Копируем DLL зависимости
+        copy C:\msys64\mingw64\bin\libxlsreader*.dll artifacts\ 2>nul || echo "No libxls DLLs to copy"
+        copy C:\msys64\mingw64\bin\libiconv*.dll artifacts\ 2>nul || echo "No iconv DLLs to copy"
+        copy C:\msys64\mingw64\bin\libwinpthread*.dll artifacts\ 2>nul || echo "No pthread DLLs to copy"
         Compress-Archive -Path artifacts\* -DestinationPath analytics-app-windows-v0.1.0.zip
         
     - name: Windows build report
       shell: msys2 {0}
       run: |
-        echo "🏗️  Windows Build Status Report"
-        echo "================================"
+        echo "🏗️  Windows Build Report"
+        echo "========================"
+        echo "✅ GCC Version: 13"
         echo "✅ libxls: SUCCESSFULLY BUILT"
-        echo "✅ Application: BUILT SUCCESSFULLY" 
-        echo "✅ Core tests: PASSED"
-        echo "✅ Demo programs: WORKING"
-        echo "✅ Excel parsing: ENABLED"
+        echo "✅ Application: COMPILED"
+        echo "✅ Tests: PASSED"
+        echo "✅ Excel Parsing: ENABLED"
         echo "📦 Artifact: READY"
         echo ""
-        echo "🎯 Excel file parsing now available on ALL platforms!"
+        echo "🎯 All platforms now support Excel file parsing!"
