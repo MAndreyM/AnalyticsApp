@@ -28,11 +28,11 @@ jobs:
           mingw-w64-x86_64-ninja
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-git
           make
           autoconf
           automake
           libtool
+          wget
         
     - name: Build libxls from source in MSYS2
       shell: msys2 {0}
@@ -51,6 +51,10 @@ jobs:
         make install
         
         echo "✅ libxls built and installed to /mingw64"
+        
+        # Проверяем установку
+        ls -la /mingw64/include/xls.h
+        ls -la /mingw64/lib/libxlsreader*
         
     - name: Build application
       shell: msys2 {0}
@@ -88,7 +92,11 @@ jobs:
       run: |
         cd build
         echo "📊 Verifying Excel support..."
-        ./bin/analytics_app.exe --help | grep -i excel && echo "✅ Excel support: ENABLED" || echo "❌ Excel support: DISABLED"
+        if ./bin/analytics_app.exe --help | grep -i excel; then
+          echo "✅ Excel support: ENABLED"
+        else
+          echo "❌ Excel support: DISABLED"
+        fi
         
     - name: Create artifact
       if: ${{ inputs.create-artifact }}
