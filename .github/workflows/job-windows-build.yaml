@@ -35,67 +35,54 @@ jobs:
           libtool
           wget
         
-    - name: Build and install libxls 1.6.3
+    - name: Find and install libxls
       shell: msys2 {0}
       run: |
-        echo "📦 Building libxls 1.6.3 with available GCC..."
+        echo "🔍 Searching for available libxls packages..."
+        pacman -Ss libxls
         
-        # Проверяем версию GCC
-        gcc --version
-        
-        cd /tmp
-        wget https://github.com/libxls/libxls/releases/download/v1.6.3/libxls-1.6.3.tar.gz
-        tar -xzf libxls-1.6.3.tar.gz
-        cd libxls-1.6.3
-        
-        # Исправляем конфигурацию для правильной установки
-        ./configure --prefix=/mingw64
-        
-        # В версии 1.6.3 используем обычный make для сборки C библиотеки
-        echo "🔨 Building library..."
-        make
-        
-        # Устанавливаем вручную
-        echo "📥 Installing to /mingw64..."
-        mkdir -p /mingw64/include/libxls
-        mkdir -p /mingw64/lib/pkgconfig
-        mkdir -p /mingw64/bin
-        
-        # Копируем заголовочные файлы
-        cp include/libxls/*.h /mingw64/include/libxls/
-        cp include/xls.h /mingw64/include/
-        
-        # Копируем библиотеки из правильных мест
-        if [ -f "src/.libs/libxlsreader.a" ]; then
-            cp src/.libs/libxlsreader.a /mingw64/lib/
+        echo "📦 Installing libxls..."
+        # Пробуем установить libxls из репозиториев
+        if pacman -S --noconfirm mingw-w64-x86_64-libxls 2>/dev/null; then
+          echo "✅ libxls installed from MSYS2 repositories"
+        else
+          echo "⚠️  libxls not found in repositories, building from source..."
+          # Запасной вариант - сборка из исходников
+          cd /tmp
+          wget https://github.com/libxls/libxls/releases/download/v1.6.2/libxls-1.6.2.tar.gz
+          tar -xzf libxls-1.6.2.tar.gz
+          cd libxls-1.6.2
+          
+          ./configure --prefix=/mingw64
+          make
+          
+          # Устанавливаем вручную
+          mkdir -p /mingw64/include/libxls
+          cp include/libxls/*.h /mingw64/include/libxls/
+          cp include/xls.h /mingw64/include/
+          cp src/.libs/libxlsreader.a /mingw64/lib/
+          cp src/.libs/libxlsreader.dll.a /mingw64/lib/
+          cp src/.libs/libxlsreader-2.dll /mingw64/bin/
+          
+          # Создаем pkg-config файл
+          cat > /mingw64/lib/pkgconfig/libxls.pc << EOF
+          prefix=/mingw64
+          exec_prefix=\${prefix}
+          libdir=\${exec_prefix}/lib
+          includedir=\${prefix}/include
+          
+          Name: libxls
+          Description: Library for reading Excel XLS files
+          Version: 1.6.2
+          Libs: -L\${libdir} -lxlsreader
+          Cflags: -I\${includedir}
+          EOF
+          echo "✅ libxls built from source"
         fi
-        if [ -f "src/.libs/libxlsreader.dll.a" ]; then
-            cp src/.libs/libxlsreader.dll.a /mingw64/lib/
-        fi
-        if [ -f "src/.libs/libxlsreader-2.dll" ]; then
-            cp src/.libs/libxlsreader-2.dll /mingw64/bin/
-        elif [ -f "src/.libs/libxlsreader.dll" ]; then
-            cp src/.libs/libxlsreader.dll /mingw64/bin/
-        fi
         
-        # Создаем pkg-config файл вручную
-        cat > /mingw64/lib/pkgconfig/libxls.pc << EOF
-        prefix=/mingw64
-        exec_prefix=\${prefix}
-        libdir=\${exec_prefix}/lib
-        includedir=\${prefix}/include
-        
-        Name: libxls
-        Description: Library for reading Excel XLS files
-        Version: 1.6.3
-        Libs: -L\${libdir} -lxlsreader
-        Cflags: -I\${includedir}
-        EOF
-        
-        # Проверяем установку
-        echo "✅ libxls 1.6.3 installation check:"
-        find /mingw64 -name "*xls*" -type f
+        echo "✅ Verification:"
         pkg-config --exists libxls && echo "✅ pkg-config can find libxls"
+        find /mingw64 -name "*xls*" -type f
         
     - name: Build application
       shell: msys2 {0}
@@ -108,7 +95,6 @@ jobs:
           BUILD_TYPE_FLAG="-DCMAKE_BUILD_TYPE=${{ inputs.build-type }}"
         fi
         
-        # Принудительно указываем путь к pkg-config
         export PKG_CONFIG_PATH="/mingw64/lib/pkgconfig:$PKG_CONFIG_PATH"
         
         cmake -G Ninja $BUILD_TYPE_FLAG ..
@@ -151,7 +137,6 @@ jobs:
         mkdir artifacts
         copy build\bin\analytics_app.exe artifacts\
         copy build\bin\demo_datamodels.exe artifacts\
-        # Копируем DLL зависимости
         copy C:\msys64\mingw64\bin\libxlsreader*.dll artifacts\ 2>nul || echo "No libxls DLLs to copy"
         copy C:\msys64\mingw64\bin\libiconv*.dll artifacts\ 2>nul || echo "No iconv DLLs to copy"
         copy C:\msys64\mingw64\bin\libwinpthread*.dll artifacts\ 2>nul || echo "No pthread DLLs to copy"
@@ -163,10 +148,8 @@ jobs:
         echo "🏗️  Windows Build Report"
         echo "========================"
         gcc --version | head -1
-        echo "✅ libxls: INSTALLED (v1.6.3)"
+        echo "✅ libxls: INSTALLED"
         echo "✅ Application: COMPILED"
         echo "✅ Tests: PASSED"
         echo "✅ Excel Parsing: ENABLED"
         echo "📦 Artifact: READY"
-        echo ""
-        echo "🎯 All platforms now support Excel file parsing!"
