@@ -35,6 +35,10 @@ jobs:
 
     - name: Configure CMake
       run: |
+        # Очищаем папку build для чистой конфигурации CMake
+        if (Test-Path "build") {
+          Remove-Item -Recurse -Force build
+        }
         mkdir build
         cd build
         cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} ..
