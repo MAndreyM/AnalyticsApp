@@ -23,12 +23,20 @@ option(ENABLE_COVERAGE "Enable code coverage" OFF)
 # Включение поддиректорий
 add_subdirectory(src)
 
-find_package(doctest QUIET)
-if(NOT doctest_FOUND AND ENABLE_TESTS)
-    message(WARNING "doctest not found, tests will be disabled")
-    set(ENABLE_TESTS OFF)
-endif()
-
+# Загрузка doctest через FetchContent если включены тесты
 if(ENABLE_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        doctest
+        GIT_REPOSITORY https://github.com/doctest/doctest.git
+        GIT_TAG v2.4.11
+    )
+    
+    FetchContent_GetProperties(doctest)
+    if(NOT doctest_POPULATED)
+        FetchContent_Populate(doctest)
+        add_subdirectory(${doctest_SOURCE_DIR} ${doctest_BINARY_DIR})
+    endif()
+    
     add_subdirectory(tests)
 endif()
