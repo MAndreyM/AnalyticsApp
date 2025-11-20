@@ -8,7 +8,6 @@ on:
 
 env:
   BUILD_TYPE: Release
-  NUMBER_OF_PROCESSORS: 2
 
 jobs:
   build-windows:
@@ -18,31 +17,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Cache Chocolatey packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          C:\ProgramData\chocolatey\bin
-          C:\ProgramData\chocolatey\lib
-        key: ${{ runner.os }}-choco-${{ hashFiles('**/chocolatey-packages.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-choco-
-
     - name: Install dependencies
       run: |
-        # Устанавливаем только если нет в кэше
         choco install cmake ninja -y --no-progress
 
     - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS="/MP" ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} ..
 
     - name: Build
       run: |
         cd build
-        ninja -j $env:NUMBER_OF_PROCESSORS
+        ninja
 
     - name: Test basic functionality
       run: |
