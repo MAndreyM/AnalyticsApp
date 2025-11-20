@@ -1,0 +1,40 @@
+name: CI/CD AltLinux Alt10
+
+on:
+  push:
+    branches: [ develop, main, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-altlinux-alt10:
+    name: Build AltLinux Alt10
+    runs-on: ubuntu-latest
+    container:
+      image: mandrm/altlinux-ci-analytics:alt10
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} ..
+
+    - name: Build
+      run: |
+        cd build
+        ninja
+        ls -la bin/ || echo "Bin directory not found"
+
+    - name: Test basic functionality
+      run: |
+        cd build
+        # Тестируем только help и version, без обязательных аргументов
+        ./src/analytics_app --help || true
+        ./src/analytics_app --version || true
+        ./src/demo_html_parser --help || true

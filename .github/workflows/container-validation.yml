@@ -1,0 +1,24 @@
+name: Container Validation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate-containers:
+    name: Validate CI Containers
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: 
+          - mandrm/redos-ci-analytics:latest
+          - mandrm/altlinux-ci-analytics:latest 
+          - mandrm/altlinux-ci-analytics:alt10
+    container:
+      image: ${{ matrix.image }}
+    steps:
+    - name: Check tools
+      run: |
+        cmake --version
+        ninja --version
+        g++ --version
+        echo "Container ${{ matrix.image }} is ready"

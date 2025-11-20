@@ -1,0 +1,55 @@
+name: CI/CD Windows
+
+on:
+  push:
+    branches: [ develop, main, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache build dependencies
+      uses: actions/cache@v3
+      id: cache-build
+      with:
+        path: |
+          C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+          ${{ github.workspace }}\build
+        key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt', '**/*.cpp', '**/*.h') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+
+    - name: Install dependencies
+      if: steps.cache-build.outputs.cache-hit != 'true'
+      run: |
+        choco install cmake ninja -y --no-progress
+
+    - name: Configure CMake
+      run: |
+        # Очищаем папку build для чистой конфигурации CMake
+        if (Test-Path "build") {
+          Remove-Item -Recurse -Force build
+        }
+        mkdir build
+        cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} ..
+
+    - name: Build
+      run: |
+        cd build
+        ninja
+
+    - name: Test basic functionality
+      run: |
+        cd build
+        .\src\analytics_app.exe --help
+        .\src\demo_html_parser.exe --help
