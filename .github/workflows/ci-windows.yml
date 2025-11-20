@@ -1,0 +1,40 @@
+name: CI/CD Windows
+
+on:
+  push:
+    branches: [ develop, main, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        choco install cmake ninja -y
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} ..
+
+    - name: Build
+      run: |
+        cd build
+        ninja
+        dir bin\ || echo "Bin directory not found"
+
+    - name: Test basic functionality
+      run: |
+        cd build
+        .\bin\analytics_app --help
+        .\bin\demo_html_parser --help
