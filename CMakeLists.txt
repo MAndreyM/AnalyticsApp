@@ -35,7 +35,8 @@ if(ENABLE_TESTS)
     FetchContent_GetProperties(doctest)
     if(NOT doctest_POPULATED)
         FetchContent_Populate(doctest)
-        # Не добавляем subdirectory, просто используем заголовочный файл
+        
+        # ТОЛЬКО include директории, БЕЗ DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
         add_library(doctest::doctest INTERFACE IMPORTED)
         target_include_directories(doctest::doctest INTERFACE ${doctest_SOURCE_DIR})
     endif()
