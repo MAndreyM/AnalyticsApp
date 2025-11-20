@@ -34,5 +34,5 @@ jobs:
     - name: Test basic functionality
       run: |
         cd build
-        ./bin/analytics_app --version
-        ./bin/demo_html_parser --help
+        ./src/analytics_app --version
+        ./src/demo_html_parser --help
