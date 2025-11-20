@@ -23,6 +23,12 @@ option(ENABLE_COVERAGE "Enable code coverage" OFF)
 # Включение поддиректорий
 add_subdirectory(src)
 
+find_package(doctest QUIET)
+if(NOT doctest_FOUND AND ENABLE_TESTS)
+    message(WARNING "doctest not found, tests will be disabled")
+    set(ENABLE_TESTS OFF)
+endif()
+
 if(ENABLE_TESTS)
     add_subdirectory(tests)
 endif()
