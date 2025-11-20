@@ -8,6 +8,7 @@ on:
 
 env:
   BUILD_TYPE: Release
+  NUMBER_OF_PROCESSORS: 2
 
 jobs:
   build-windows:
@@ -17,26 +18,34 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Cache Chocolatey packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          C:\ProgramData\chocolatey\bin
+          C:\ProgramData\chocolatey\lib
+        key: ${{ runner.os }}-choco-${{ hashFiles('**/chocolatey-packages.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-choco-
+
     - name: Install dependencies
       run: |
-        choco install cmake ninja -y
+        # Устанавливаем только если нет в кэше
+        choco install cmake ninja -y --no-progress
 
     - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS="/MP" ..
 
     - name: Build
       run: |
         cd build
-        ninja
-        # Проверяем структуру папок в Windows
-        dir src\ || echo "Src directory not found"
-        dir tests\ || echo "Tests directory not found"
+        ninja -j $env:NUMBER_OF_PROCESSORS
 
     - name: Test basic functionality
       run: |
         cd build
-        .\src\analytics_app --help
-        .\src\demo_html_parser --help
+        .\src\analytics_app.exe --help
+        .\src\demo_html_parser.exe --help
