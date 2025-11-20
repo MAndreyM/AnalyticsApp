@@ -35,7 +35,9 @@ if(ENABLE_TESTS)
     FetchContent_GetProperties(doctest)
     if(NOT doctest_POPULATED)
         FetchContent_Populate(doctest)
-        add_subdirectory(${doctest_SOURCE_DIR} ${doctest_BINARY_DIR})
+        # Не добавляем subdirectory, просто используем заголовочный файл
+        add_library(doctest::doctest INTERFACE IMPORTED)
+        target_include_directories(doctest::doctest INTERFACE ${doctest_SOURCE_DIR})
     endif()
     
     add_subdirectory(tests)
