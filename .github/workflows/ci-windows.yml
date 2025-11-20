@@ -31,10 +31,12 @@ jobs:
       run: |
         cd build
         ninja
-        dir bin\ || echo "Bin directory not found"
+        # Проверяем структуру папок в Windows
+        dir src\ || echo "Src directory not found"
+        dir tests\ || echo "Tests directory not found"
 
     - name: Test basic functionality
       run: |
         cd build
-        .\bin\analytics_app --help
-        .\bin\demo_html_parser --help
+        .\src\analytics_app --help
+        .\src\demo_html_parser --help
