@@ -17,7 +17,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Cache build dependencies
+      uses: actions/cache@v3
+      id: cache-build
+      with:
+        path: |
+          C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+          ${{ github.workspace }}\build
+        key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt', '**/*.cpp', '**/*.h') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+
     - name: Install dependencies
+      if: steps.cache-build.outputs.cache-hit != 'true'
       run: |
         choco install cmake ninja -y --no-progress
 
