@@ -29,6 +29,9 @@ jobs:
       run: |
         cd build
         ninja
+        # Проверим, создались ли файлы
+        ls -la bin/ || echo "Bin directory not found"
+        find . -name "analytics_app" -type f || echo "analytics_app not found"
 
     - name: Test basic functionality
       run: |
