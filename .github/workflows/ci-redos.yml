@@ -41,7 +41,7 @@ jobs:
         ./src/analytics_app --version || true
         ./src/demo_html_parser --help || true
 
-      - name: Run DataModels tests
-        run: |
-          cd build
-          ./tests/test_datamodels
+    - name: Run DataModels tests
+      run: |
+        cd build
+        ./tests/test_datamodels
