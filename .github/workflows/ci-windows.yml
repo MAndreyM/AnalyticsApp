@@ -53,3 +53,8 @@ jobs:
         cd build
         .\src\analytics_app.exe --help
         .\src\demo_html_parser.exe --help
+
+    - name: Run DataModels tests
+      run: |
+        cd build
+        .\tests\test_datamodels

@@ -8,6 +8,7 @@ add_executable(demo_html_parser Demo/demo_html_parser.cpp)
 add_library(Utils
     Utils/Logger.cpp
     Utils/Config.cpp
+    Core/DataModels.cpp  # ← ДОБАВЛЕНО
 )
 
 # Подключение зависимостей
