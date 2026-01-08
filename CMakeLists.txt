@@ -1,7 +1,7 @@
 # ============================================
 # Файл: CMakeLists.txt (корневой)
 # Проект: Анализ успеваемости учащихся
-# Версия: 1.0
+# Версия: 1.1 (обновлено для двухуровневой структуры)
 # ============================================
 
 # Минимальная требуемая версия CMake
@@ -74,6 +74,8 @@ endif()
 
 # Основные каталоги проекта
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
+# Выходные директории
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -103,15 +105,79 @@ else()
 endif()
 
 # ============================================
-# 5. ОПРЕДЕЛЕНИЕ ЦЕЛЕЙ ПРОЕКТА
+# 5. ПОИСК И НАСТРОЙКА QT6
 # ============================================
 
-# Основные цели проекта (будут заполнены в последующие дни)
-#add_subdirectory(src)  # Исходный код приложения
-#add_subdirectory(tests) # Тесты
+# Поиск Qt6 с обязательными компонентами
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Xml)
+
+message(STATUS "Qt6 версия: ${Qt6_VERSION}")
+message(STATUS "Qt6 Core: ${Qt6Core_FOUND}")
+message(STATUS "Qt6 Widgets: ${Qt6Widgets_FOUND}")
+message(STATUS "Qt6 Xml: ${Qt6Xml_FOUND}")
+
+# Включение автоматического подключения MOC, UIC, RCC
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+# Установка директорий для MOC файлов
+set(CMAKE_AUTOMOC_MOC_OPTIONS "-bqt_property_name")
+set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/src/views")
 
 # ============================================
-# 6. НАСТРОЙКА ГЕНЕРАТОРА СБОРКИ
+# 6. НАСТРОЙКА ПЕРЕМЕННЫХ ПРОЕКТА
+# ============================================
+
+# Определение каталога с исходным кодом
+set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
+
+# Список всех библиотек проекта
+set(PROJECT_LIBRARIES
+    AnalyticsCore
+    AnalyticsParsers
+    AnalyticsServices
+    AnalyticsControllers
+    AnalyticsViews
+)
+
+# Список всех целей проекта
+set(PROJECT_TARGETS
+    ${PROJECT_LIBRARIES}
+    AnalyticsApp
+)
+
+# ============================================
+# 7. ДОБАВЛЕНИЕ ПОДКАТАЛОГОВ
+# ============================================
+
+# Добавление исходного кода
+add_subdirectory(src)
+
+# Добавление тестов (будут в день 4)
+# add_subdirectory(tests)
+
+# Добавление примеров (опционально)
+# add_subdirectory(examples)
+
+# ============================================
+# 8. НАСТРОЙКА УСТАНОВКИ (ПРЕДВАРИТЕЛЬНО)
+# ============================================
+
+# Установка заголовочных файлов
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/core DESTINATION include
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/parsers DESTINATION include
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/services DESTINATION include
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/controllers DESTINATION include
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/views DESTINATION include
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
+
+# ============================================
+# 9. НАСТРОЙКА ГЕНЕРАТОРА СБОРКИ
 # ============================================
 
 # Предпочтительный генератор - Ninja
@@ -132,7 +198,7 @@ else()
 endif()
 
 # ============================================
-# 7. ИНФОРМАЦИОННОЕ СООБЩЕНИЕ
+# 10. ИНФОРМАЦИОННОЕ СООБЩЕНИЕ
 # ============================================
 
 message(STATUS "========================================")
@@ -142,5 +208,7 @@ message(STATUS "Система: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Компилятор: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "Стандарт C++: ${CMAKE_CXX_STANDARD}")
 message(STATUS "Тип сборки: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Qt6 версия: ${Qt6_VERSION}")
+message(STATUS "Директория исходников: ${PROJECT_SOURCE_DIR}")
 message(STATUS "Выходной каталог: ${CMAKE_BINARY_DIR}")
 message(STATUS "========================================")
