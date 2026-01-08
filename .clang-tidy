@@ -1,0 +1,75 @@
+# Конфигурация clang-tidy для проекта C++20/Qt6
+
+Checks: >
+  *,
+  -abseil-*,
+  -altera-*,
+  -android-*,
+  -fuchsia-*,
+  -google-*,
+  -hicpp-*,
+  -linuxkernel-*,
+  -llvm-*,
+  -llvmlibc-*,
+  -mpi-*,
+  -objc-*,
+  -openmp-*,
+  -zircon-*,
+  -readability-identifier-length,
+  -modernize-use-trailing-return-type,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file
+CheckOptions:
+  - key: modernize-use-nullptr.ReplacementFunction
+    value: 'nullptr'
+  - key: modernize-use-using.ReplacementType
+    value: 'using'
+  - key: modernize-loop-convert.MaxCopySize
+    value: '16'
+  - key: modernize-loop-convert.MinConfidence
+    value: 'reasonable'
+  - key: readability-identifier-naming.ClassCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.StructCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.EnumCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.FunctionCase
+    value: 'camelBack'
+  - key: readability-identifier-naming.VariableCase
+    value: 'snake_case'
+  - key: readability-identifier-naming.MemberCase
+    value: 'snake_case'
+  - key: readability-identifier-naming.ConstantCase
+    value: 'UPPER_CASE'
+  - key: cppcoreguidelines-avoid-non-const-global-variables.Exclude
+    value: 'qt_*
+            q_*
+            *_instance'
+  - key: readability-uppercase-literal-suffix.IgnoreMacros
+    value: 'true'
+  - key: modernize-use-default-member-init.IgnoreMacros
+    value: 'true'
+  - key: modernize-use-equals-default.IgnoreMacros
+    value: 'true'
+  - key: modernize-use-equals-delete.IgnoreMacros
+    value: 'true'
+  - key: modernize-use-override.IgnoreDestructors
+    value: 'false'
+  - key: modernize-pass-by-value.IncludeStyle
+    value: 'value'
+  - key: modernize-replace-auto-ptr.IncludeStyle
+    value: 'value'
+  - key: modernize-use-auto.MinTypeNameLength
+    value: '10'
+  - key: modernize-use-emplace.ContainersWithPushBack
+    value: 'vector;deque;list'
+  - key: modernize-use-noexcept.ReplaceThrow
+    value: 'false'
+
+# Qt специфичные настройки
+HeaderFilterRegex: '^(?!.*/moc_).*'
