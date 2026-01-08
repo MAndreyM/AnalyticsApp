@@ -1,0 +1,91 @@
+# Скомпилированные файлы и объекты
+*.o
+*.ko
+*.obj
+*.elf
+
+# Предкомпилированные заголовки
+*.gch
+*.pch
+
+# Библиотеки
+*.lib
+*.a
+*.la
+*.lo
+*.dll
+
+# Исполняемые файлы
+*.exe
+*.out
+*.app
+*.so
+*.dylib
+
+# Qt специфичные
+moc_*.cpp
+moc_*.cc
+ui_*.h
+qrc_*.cpp
+*.qm
+Makefile*
+
+# Qt Creator
+*.autosave
+*.pro.user
+*.pro.user.*
+*.qmlc
+*.jsc
+
+# Сборка
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Временные файлы
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Пакеты
+*.deb
+*.rpm
+*.msi
+*.dmg
+
+# Отчеты
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
+# Документация
+docs/html/
+docs/latex/
+
+# Тестовые данные
+tests/fixtures/real_data/*.xls
+!tests/fixtures/real_data/README.md
+
+# Сгенерированные отчеты
+*.xlsx
+*.csv
+*.pdf
+
+# Настройки системы
+*.user
+*.suo
+*.sdf
+*.opensdf
