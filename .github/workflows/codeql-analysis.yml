@@ -25,6 +25,23 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          ninja-build \
+          g++ \
+          libgl1-mesa-dev \
+          qt6-base-dev \
+          qt6-tools-dev \
+          qt6-tools-dev-tools \
+          libqt6xml6 \
+          libqt6core6 \
+          libqt6widgets6
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -32,8 +49,16 @@ jobs:
         languages: ${{ matrix.language }}
         queries: security-extended,security-and-quality
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
+    - name: Build project for CodeQL analysis
+      run: |
+        mkdir -p build
+        cd build
+        cmake -G Ninja \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6 \
+          ..
+        ninja
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
