@@ -122,7 +122,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 # Установка директорий для MOC файлов
-# set(CMAKE_AUTOMOC_MOC_OPTIONS "-bqt_property_name")
+# # set(CMAKE_AUTOMOC_MOC_OPTIONS "-bqt_property_name")
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/src/views")
 
 # ============================================

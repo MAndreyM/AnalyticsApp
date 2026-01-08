@@ -1,8 +1,6 @@
-// Заглушка для AnalyticsViews
-#include <QWidget>
+#include "dummy_view.hpp"
 
-class MainWindow : public QWidget {
-    Q_OBJECT
-public:
-    MainWindow(QWidget* parent = nullptr) : QWidget(parent) {}
-};
+DummyView::DummyView(QWidget* parent) 
+    : QWidget(parent) {
+    // Простой конструктор
+}

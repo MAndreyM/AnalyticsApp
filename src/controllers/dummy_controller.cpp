@@ -1,9 +1,4 @@
 #include "dummy_controller.hpp"
 
-DummyController::DummyController(QObject* parent) 
-    : QObject(parent) {
-}
-
-void DummyController::dummySlot() {
-    emit dummySignal();
-}
+// Если метод был определен внутри класса, файл может быть пустым
+// или содержать дополнительные реализации
