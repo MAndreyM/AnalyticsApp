@@ -169,7 +169,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/doctest/doctest.h)
     
     # Опции для doctest
     target_compile_definitions(doctest INTERFACE 
-        DOCTEST_CONFIG_NO_SHORT_MACRO_NAMES
+        #DOCTEST_CONFIG_NO_SHORT_MACRO_NAMES
         DOCTEST_CONFIG_SUPER_FAST_ASSERTS
     )
 else()

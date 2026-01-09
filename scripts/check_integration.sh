@@ -130,7 +130,10 @@ if [ -f "tests/CMakeLists.txt" ]; then
         error "   Цель 'tests' не определена"
     fi
     
-    if grep -q "doctest::doctest" tests/CMakeLists.txt; then
+    # ГИБКАЯ ПРОВЕРКА ПОДКЛЮЧЕНИЯ DOCTEST (принимает оба варианта: doctest или doctest::doctest)
+    if grep -A10 "target_link_libraries.*tests" tests/CMakeLists.txt | grep -q "doctest"; then
+        success "   Doctest подключен к цели tests"
+    elif grep -q "doctest::doctest" tests/CMakeLists.txt; then
         success "   Doctest подключен к цели tests"
     else
         error "   Doctest не подключен к цели tests"
@@ -242,18 +245,36 @@ else
     grep -i "error" build_output.log | tail -5
 fi
 
-# Проверка наличия исполняемого файла тестов
-if [ -f "tests/tests" ]; then
+# ПРОВЕРКА НАЛИЧИЯ ИСПОЛНЯЕМОГО ФАЙЛА ТЕСТОВ В /bin/Debug/tests
+info "   Проверка наличия исполняемого файла тестов..."
+
+if [ -f "bin/Debug/tests" ]; then
+    success "   Исполняемый файл тестов создан: bin/Debug/tests"
+    file bin/Debug/tests
+    EXECUTABLE="./bin/Debug/tests"
+elif [ -f "bin/Release/tests" ]; then
+    success "   Исполняемый файл тестов создан: bin/Release/tests"
+    EXECUTABLE="./bin/Release/tests"
+elif [ -f "tests/tests" ]; then
     success "   Исполняемый файл тестов создан: tests/tests"
     file tests/tests
+    EXECUTABLE="./tests/tests"
 elif [ -f "tests/tests.exe" ]; then
     success "   Исполняемый файл тестов создан: tests/tests.exe"
+    EXECUTABLE="./tests/tests.exe"
 else
-    error "   Исполняемый файл тестов не создан"
+    warning "   Исполняемый файл тестов не найден в ожидаемых путях"
     
     # Поиск исполняемого файла
     info "   Поиск исполняемого файла..."
-    find . -name "tests" -type f -executable 2>/dev/null | head -3
+    find . -name "tests" -type f -executable 2>/dev/null | head -3 | while read found_file; do
+        info "   Найден: $found_file"
+        EXECUTABLE="./$found_file"
+    done
+    
+    if [ -z "$EXECUTABLE" ]; then
+        error "   Исполняемый файл тестов не создан"
+    fi
 fi
 
 # ============================================
@@ -262,15 +283,23 @@ fi
 
 info "7. Запуск тестов..."
 
-EXECUTABLE=""
-if [ -f "tests/tests" ]; then
-    EXECUTABLE="./tests/tests"
-elif [ -f "tests/tests.exe" ]; then
-    EXECUTABLE="./tests/tests.exe"
-else
-    error "   Исполняемый файл тестов не найден"
-    exit 1
+# Если EXECUTABLE еще не установлен, ищем снова
+if [ -z "$EXECUTABLE" ]; then
+    if [ -f "bin/Debug/tests" ]; then
+        EXECUTABLE="./bin/Debug/tests"
+    elif [ -f "bin/Release/tests" ]; then
+        EXECUTABLE="./bin/Release/tests"
+    elif [ -f "tests/tests" ]; then
+        EXECUTABLE="./tests/tests"
+    elif [ -f "tests/tests.exe" ]; then
+        EXECUTABLE="./tests/tests.exe"
+    else
+        error "   Исполняемый файл тестов не найден"
+        exit 1
+    fi
 fi
+
+success "   Исполняемый файл: $EXECUTABLE"
 
 if $EXECUTABLE --success 2>&1 | tee test_output.log; then
     success "   Тесты выполнены успешно"
@@ -279,24 +308,43 @@ if $EXECUTABLE --success 2>&1 | tee test_output.log; then
     echo ""
     echo "   📊 Результаты тестов:"
     
-    # Извлечение статистики
+    # Извлечение статистики - исправленные регулярные выражения
     if grep -q "test cases:" test_output.log; then
-        TESTS_PASSED=$(grep -o "test cases:.*passed" test_output.log | grep -o "[0-9]*" | head -1)
-        TESTS_FAILED=$(grep -o "test cases:.*failed" test_output.log | grep -o "[0-9]*" | head -2 | tail -1)
-        TESTS_SKIPPED=$(grep -o "test cases:.*skipped" test_output.log | grep -o "[0-9]*" | tail -1)
+        TESTS_PASSED=$(grep "test cases:" test_output.log | grep -o "[0-9]\+ passed" | grep -o "[0-9]\+")
+        TESTS_FAILED=$(grep "test cases:" test_output.log | grep -o "[0-9]\+ failed" | grep -o "[0-9]\+")
+        TESTS_SKIPPED=$(grep "test cases:" test_output.log | grep -o "[0-9]\+ skipped" | grep -o "[0-9]\+")
         
-        info "     Пройдено: $TESTS_PASSED"
-        if [ "$TESTS_FAILED" -gt 0 ]; then
-            error "     Не пройдено: $TESTS_FAILED"
-        else
-            success "     Не пройдено: $TESTS_FAILED"
+        # Если не нашли, пробуем альтернативный формат
+        if [ -z "$TESTS_PASSED" ]; then
+            TESTS_PASSED=$(grep "test cases:" test_output.log | grep -o "| [0-9]\+ passed" | grep -o "[0-9]\+")
+            TESTS_FAILED=$(grep "test cases:" test_output.log | grep -o "| [0-9]\+ failed" | grep -o "[0-9]\+")
+            TESTS_SKIPPED=$(grep "test cases:" test_output.log | grep -o "| [0-9]\+ skipped" | grep -o "[0-9]\+")
         fi
-        if [ "$TESTS_SKIPPED" -gt 0 ]; then
-            warning "     Пропущено: $TESTS_SKIPPED"
+        
+        info "     Пройдено: ${TESTS_PASSED:-0}"
+        if [ "${TESTS_FAILED:-0}" -gt 0 ]; then
+            error "     Не пройдено: ${TESTS_FAILED:-0}"
+        else
+            success "     Не пройдено: ${TESTS_FAILED:-0}"
+        fi
+        if [ "${TESTS_SKIPPED:-0}" -gt 0 ]; then
+            warning "     Пропущено: ${TESTS_SKIPPED:-0}"
+        fi
+        
+        # Также выводим статистику по проверкам
+        if grep -q "assertions:" test_output.log; then
+            ASSERTIONS_PASSED=$(grep "assertions:" test_output.log | grep -o "[0-9]\+ passed" | grep -o "[0-9]\+")
+            ASSERTIONS_FAILED=$(grep "assertions:" test_output.log | grep -o "[0-9]\+ failed" | grep -o "[0-9]\+")
+            info "     Проверки пройдены: ${ASSERTIONS_PASSED:-0}"
+            if [ "${ASSERTIONS_FAILED:-0}" -gt 0 ]; then
+                error "     Проверки не пройдены: ${ASSERTIONS_FAILED:-0}"
+            else
+                success "     Проверки не пройдены: ${ASSERTIONS_FAILED:-0}"
+            fi
         fi
     fi
     
-    if grep -q "All tests passed" test_output.log; then
+    if grep -q "All tests passed" test_output.log || grep -q "Status: SUCCESS" test_output.log; then
         success "   ✅ Все тесты прошли успешно!"
     fi
 else
@@ -407,48 +455,57 @@ echo "2. Создание основных структур данных (Ден
 echo "3. Реализация парсера баллов (День 7)"
 echo "========================================="
 
-# Создание файла с результатами проверки
-cat > integration_check_report.md << REPORT
-# Отчет проверки интеграции зависимостей
-
-**Дата:** $(date)
-**Версия проекта:** 0.1.0
-**Тип интеграции:** Заголовочный файл (Doctest) + Системная установка (QtXlsxWriter)
-
-## Результаты проверки:
-
-### 1. Doctest (заголовочный файл)
-- [x] Файл `doctest.h` скачан в `third_party/doctest/`
-- [x] Версия: $DOCTEST_VERSION
-- [x] Настроен как интерфейсная библиотека в CMake
-- [x] Интегрирован в систему сборки
-
-### 2. QtXlsxWriter (системная установка)
-- [$(if [ "$QTXLSX_HEADER_FOUND" = true ]; then echo "x"; else echo " "; fi)] Заголовочные файлы найдены в системе
-- [$(if [ "$QTXLSX_LIB_FOUND" = true ]; then echo "x"; else echo " "; fi)] Библиотека найдена в системе
-- [x] Создан файл `FindQtXlsxWriter.cmake` для поиска
-- [x] Интегрирован в CMake через `find_package`
-
-### 3. CMake конфигурация
-- [x] Doctest добавлен через `add_subdirectory`
-- [x] QtXlsxWriter ищется через `find_package`
-- [x] Цель `tests` создана
-- [x] Цель `run_tests` создана
-
-### 4. Тестирование
-- [x] Тестовый файл `test_doctest_integration.cpp` создан
-- [x] Тесты успешно компилируются
-- [x] Тесты успешно запускаются
-- [x] Базовые тесты проходят
-
-## Статус: ✅ УСПЕШНО
-
-**Замечания:**
-$(if [ "$WARNINGS" -gt 0 ]; then echo "- Обнаружено $WARNINGS предупреждений компилятора"; fi)
-$(if [ "$TESTS_FAILED" -gt 0 ]; then echo "- Не пройдено тестов: $TESTS_FAILED"; fi)
-
-**Рекомендации:**
-1. Убедитесь, что QtXlsxWriter установлен в системе для генерации отчетов
-REPORT
+# Упрощенное создание отчета без проблем с here-document
+echo "# Отчет проверки интеграции зависимостей" > integration_check_report.md
+echo "**Дата:** $(date)" >> integration_check_report.md
+echo "**Версия проекта:** 0.1.0" >> integration_check_report.md
+echo "**Тип интеграции:** Заголовочный файл (Doctest) + Системная установка (QtXlsxWriter)" >> integration_check_report.md
+echo "" >> integration_check_report.md
+echo "## Результаты проверки:" >> integration_check_report.md
+echo "" >> integration_check_report.md
+echo "### 1. Doctest (заголовочный файл)" >> integration_check_report.md
+echo "- [x] Файл \`doctest.h\` скачан в \`third_party/doctest/\`" >> integration_check_report.md
+echo "- [x] Версия: $DOCTEST_VERSION" >> integration_check_report.md
+echo "- [x] Настроен как интерфейсная библиотека в CMake" >> integration_check_report.md
+echo "- [x] Интегрирован в систему сборки" >> integration_check_report.md
+echo "" >> integration_check_report.md
+echo "### 2. QtXlsxWriter (системная установка)" >> integration_check_report.md
+if [ "$QTXLSX_HEADER_FOUND" = true ]; then
+    echo "- [x] Заголовочные файлы найдены в системе" >> integration_check_report.md
+else
+    echo "- [ ] Заголовочные файлы найдены в системе" >> integration_check_report.md
+fi
+if [ "$QTXLSX_LIB_FOUND" = true ]; then
+    echo "- [x] Библиотека найдена в системе" >> integration_check_report.md
+else
+    echo "- [ ] Библиотека найдена в системе" >> integration_check_report.md
+fi
+echo "- [x] Создан файл \`FindQtXlsxWriter.cmake\` для поиска" >> integration_check_report.md
+echo "- [x] Интегрирован в CMake через \`find_package\`" >> integration_check_report.md
+echo "" >> integration_check_report.md
+echo "### 3. CMake конфигурация" >> integration_check_report.md
+echo "- [x] Doctest добавлен через \`add_subdirectory\`" >> integration_check_report.md
+echo "- [x] QtXlsxWriter ищется через \`find_package\`" >> integration_check_report.md
+echo "- [x] Цель \`tests\` создана" >> integration_check_report.md
+echo "- [x] Цель \`run_tests\` создана" >> integration_check_report.md
+echo "" >> integration_check_report.md
+echo "### 4. Тестирование" >> integration_check_report.md
+echo "- [x] Тестовый файл \`test_doctest_integration.cpp\` создан" >> integration_check_report.md
+echo "- [x] Тесты успешно компилируются" >> integration_check_report.md
+echo "- [x] Тесты успешно запускаются" >> integration_check_report.md
+echo "- [x] Базовые тесты проходят" >> integration_check_report.md
+echo "" >> integration_check_report.md
+echo "## Статус: ✅ УСПЕШНО" >> integration_check_report.md
+echo "" >> integration_check_report.md
+echo "**Замечания:**" >> integration_check_report.md
+if [ "$WARNINGS" -gt 0 ]; then
+    echo "- Обнаружено $WARNINGS предупреждений компилятора" >> integration_check_report.md
+fi
+if [ "${TESTS_FAILED:-0}" -gt 0 ]; then
+    echo "- Не пройдено тестов: ${TESTS_FAILED}" >> integration_check_report.md
+fi
+echo "" >> integration_check_report.md
+echo "**Рекомендации:**" >> integration_check_report.md
+echo "1. Убедитесь, что QtXlsxWriter установлен в системе для генерации отчетов" >> integration_check_report.md
 
 success "Отчет сохранен в integration_check_report.md"

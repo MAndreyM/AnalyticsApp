@@ -21,21 +21,21 @@ target_link_libraries(tests PRIVATE
     AnalyticsCore
     AnalyticsParsers
     AnalyticsServices
-    doctest::doctest
+    doctest
     Qt6::Core
     Qt6::Xml
 )
 
-# 4. Настройка свойств цели
+# 4. Настройка свойств цели - ИЗМЕНЕНО: вывод в текущую директорию
 set_target_properties(tests PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}  # Изменено!
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
 )
 
-# 5. Добавление цели для запуска тестов
+# 5. Добавление цели для запуска тестов - ИЗМЕНЕНО путь к исполняемому файлу
 add_custom_target(run_tests
-    COMMAND ${CMAKE_BINARY_DIR}/tests/tests --success
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests --success  # Изменено!
     DEPENDS tests
     COMMENT "Запуск тестов..."
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -43,7 +43,7 @@ add_custom_target(run_tests
 
 # 6. Добавление цели для тестов с выводом подробной информации
 add_custom_target(test_verbose
-    COMMAND ${CMAKE_BINARY_DIR}/tests/tests --success --no-skip --no-exitcode
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests --success --no-skip --no-exitcode  # Изменено!
     DEPENDS tests
     COMMENT "Запуск тестов с подробным выводом..."
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
