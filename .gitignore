@@ -39,6 +39,9 @@ Makefile*
 
 # Сборка
 build/
+build-release/
+build-debug/
+build_test/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
