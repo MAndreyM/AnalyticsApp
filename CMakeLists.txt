@@ -1,7 +1,7 @@
 # ============================================
 # Файл: CMakeLists.txt (корневой)
 # Проект: Анализ успеваемости учащихся
-# Версия: 1.1 (обновлено для двухуровневой структуры)
+# Версия: 1.2 (обновлено для интеграции doctest)
 # ============================================
 
 # Минимальная требуемая версия CMake
@@ -122,11 +122,62 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 # Установка директорий для MOC файлов
-# # set(CMAKE_AUTOMOC_MOC_OPTIONS "-bqt_property_name")
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/src/views")
 
 # ============================================
-# 6. НАСТРОЙКА ПЕРЕМЕННЫХ ПРОЕКТА
+# 6. ПОИСК QtXlsxWriter
+# ============================================
+
+# Поиск QtXlsxWriter через модуль
+find_package(QtXlsxWriter QUIET)
+if(QtXlsxWriter_FOUND)
+    message(STATUS "QtXlsxWriter найден: версия ${QtXlsxWriter_VERSION}")
+    message(STATUS "Включена поддержка генерации XLSX отчетов")
+else()
+    message(WARNING "QtXlsxWriter не найден. Генерация XLSX отчетов будет недоступна")
+endif()
+
+# ============================================
+# 7. ИНТЕГРАЦИЯ DOCTEST
+# ============================================
+
+# Добавление doctest как интерфейсной библиотеки
+if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/doctest/doctest.h)
+    message(STATUS "Doctest найден в third_party/doctest/doctest.h")
+    
+    # Создание интерфейсной библиотеки для doctest
+    add_library(doctest INTERFACE)
+    target_include_directories(doctest INTERFACE ${CMAKE_SOURCE_DIR}/third_party/doctest)
+    
+    # Получение версии doctest из заголовочного файла
+    file(STRINGS ${CMAKE_SOURCE_DIR}/third_party/doctest/doctest.h DOCTEST_VERSION_MAJOR 
+         REGEX "^#define DOCTEST_VERSION_MAJOR [0-9]+$")
+    file(STRINGS ${CMAKE_SOURCE_DIR}/third_party/doctest/doctest.h DOCTEST_VERSION_MINOR 
+         REGEX "^#define DOCTEST_VERSION_MINOR [0-9]+$")
+    file(STRINGS ${CMAKE_SOURCE_DIR}/third_party/doctest/doctest.h DOCTEST_VERSION_PATCH 
+         REGEX "^#define DOCTEST_VERSION_PATCH [0-9]+$")
+    
+    string(REGEX REPLACE "^#define DOCTEST_VERSION_MAJOR ([0-9]+)$" "\\1" 
+           DOCTEST_VERSION_MAJOR ${DOCTEST_VERSION_MAJOR})
+    string(REGEX REPLACE "^#define DOCTEST_VERSION_MINOR ([0-9]+)$" "\\1" 
+           DOCTEST_VERSION_MINOR ${DOCTEST_VERSION_MINOR})
+    string(REGEX REPLACE "^#define DOCTEST_VERSION_PATCH ([0-9]+)$" "\\1" 
+           DOCTEST_VERSION_PATCH ${DOCTEST_VERSION_PATCH})
+    
+    set(DOCTEST_VERSION "${DOCTEST_VERSION_MAJOR}.${DOCTEST_VERSION_MINOR}.${DOCTEST_VERSION_PATCH}")
+    message(STATUS "Doctest версия: ${DOCTEST_VERSION}")
+    
+    # Опции для doctest
+    target_compile_definitions(doctest INTERFACE 
+        DOCTEST_CONFIG_NO_SHORT_MACRO_NAMES
+        DOCTEST_CONFIG_SUPER_FAST_ASSERTS
+    )
+else()
+    message(WARNING "Doctest не найден. Тесты будут отключены")
+endif()
+
+# ============================================
+# 8. НАСТРОЙКА ПЕРЕМЕННЫХ ПРОЕКТА
 # ============================================
 
 # Определение каталога с исходным кодом
@@ -148,20 +199,20 @@ set(PROJECT_TARGETS
 )
 
 # ============================================
-# 7. ДОБАВЛЕНИЕ ПОДКАТАЛОГОВ
+# 9. ДОБАВЛЕНИЕ ПОДКАТАЛОГОВ
 # ============================================
 
 # Добавление исходного кода
 add_subdirectory(src)
 
-# Добавление тестов (будут в день 4)
-# add_subdirectory(tests)
+# Добавление тестов
+add_subdirectory(tests)
 
 # Добавление примеров (опционально)
 # add_subdirectory(examples)
 
 # ============================================
-# 8. НАСТРОЙКА УСТАНОВКИ (ПРЕДВАРИТЕЛЬНО)
+# 10. НАСТРОЙКА УСТАНОВКИ (ПРЕДВАРИТЕЛЬНО)
 # ============================================
 
 # Установка заголовочных файлов
@@ -177,7 +228,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/views DESTINATION include
         FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
 
 # ============================================
-# 9. НАСТРОЙКА ГЕНЕРАТОРА СБОРКИ
+# 11. НАСТРОЙКА ГЕНЕРАТОРА СБОРКИ
 # ============================================
 
 # Предпочтительный генератор - Ninja
@@ -198,7 +249,19 @@ else()
 endif()
 
 # ============================================
-# 10. ИНФОРМАЦИОННОЕ СООБЩЕНИЕ
+# 12. СОЗДАНИЕ ЦЕЛЕЙ ДЛЯ ТЕСТИРОВАНИЯ
+# ============================================
+
+# Цель для запуска всех тестов
+add_custom_target(run_tests
+    COMMAND $<TARGET_FILE:tests> --success
+    DEPENDS tests
+    COMMENT "Запуск всех тестов"
+    VERBATIM
+)
+
+# ============================================
+# 13. ИНФОРМАЦИОННОЕ СООБЩЕНИЕ
 # ============================================
 
 message(STATUS "========================================")
@@ -209,6 +272,16 @@ message(STATUS "Компилятор: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPI
 message(STATUS "Стандарт C++: ${CMAKE_CXX_STANDARD}")
 message(STATUS "Тип сборки: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Qt6 версия: ${Qt6_VERSION}")
+if(QtXlsxWriter_FOUND)
+    message(STATUS "QtXlsxWriter: ${QtXlsxWriter_VERSION}")
+else()
+    message(STATUS "QtXlsxWriter: НЕ НАЙДЕН")
+endif()
+if(TARGET doctest)
+    message(STATUS "Doctest: ${DOCTEST_VERSION}")
+else()
+    message(STATUS "Doctest: НЕ НАЙДЕН")
+endif()
 message(STATUS "Директория исходников: ${PROJECT_SOURCE_DIR}")
 message(STATUS "Выходной каталог: ${CMAKE_BINARY_DIR}")
 message(STATUS "========================================")
