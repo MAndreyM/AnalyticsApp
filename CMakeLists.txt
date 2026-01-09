@@ -253,12 +253,12 @@ endif()
 # ============================================
 
 # Цель для запуска всех тестов
-add_custom_target(run_tests
-    COMMAND $<TARGET_FILE:tests> --success
-    DEPENDS tests
-    COMMENT "Запуск всех тестов"
-    VERBATIM
-)
+#add_custom_target(run_tests
+#    COMMAND $<TARGET_FILE:tests> --success
+#    DEPENDS tests
+#    COMMENT "Запуск всех тестов"
+#    VERBATIM
+#)
 
 # ============================================
 # 13. ИНФОРМАЦИОННОЕ СООБЩЕНИЕ
