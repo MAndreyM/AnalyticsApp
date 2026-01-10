@@ -92,3 +92,6 @@ tests/fixtures/real_data/*.xls
 *.suo
 *.sdf
 *.opensdf
+
+# Логи
+logs/

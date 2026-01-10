@@ -20,14 +20,21 @@ TESTS_DIR="$PROJECT_ROOT/tests"
 UNIT_TESTS_DIR="$TESTS_DIR/unit"
 BUILD_DIR="$PROJECT_ROOT/build"
 DOCTEST_DIR="$PROJECT_ROOT/third_party/doctest"
+LOGS_DIR="$PROJECT_ROOT/logs"
 
 # Счетчики
 TOTAL_STEPS=0
 PASSED_STEPS=0
 FAILED_STEPS=0
 
-# Лог-файл
-LOG_FILE="$PROJECT_ROOT/checker_$(date +%Y%m%d_%H%M%S).log"
+# Создание каталога logs, если он не существует
+if [ ! -d "$LOGS_DIR" ]; then
+    echo -e "${BLUE}Создаю каталог для логов: $LOGS_DIR${NC}"
+    mkdir -p "$LOGS_DIR"
+fi
+
+# Лог-файл в каталоге logs
+LOG_FILE="$LOGS_DIR/checker_$(date +%Y%m%d_%H%M%S).log"
 
 # Функции
 log() {
@@ -119,6 +126,7 @@ log "${BLUE}  День 6: Базовые заголовочные файлы   $
 log "${BLUE}========================================${NC}"
 log "Дата: $(date)"
 log "Директория проекта: $PROJECT_ROOT"
+log "Директория логов: $LOGS_DIR"
 log "Лог-файл: $LOG_FILE"
 
 # ========================================
@@ -127,7 +135,7 @@ log "Лог-файл: $LOG_FILE"
 step_start "Структура директорий" "Проверка существования всех необходимых директорий"
 
 DIRS_EXIST=0
-for dir in "$SRC_DIR" "$CORE_DIR" "$PARSERS_DIR" "$TESTS_DIR" "$UNIT_TESTS_DIR"; do
+for dir in "$SRC_DIR" "$CORE_DIR" "$PARSERS_DIR" "$TESTS_DIR" "$UNIT_TESTS_DIR" "$LOGS_DIR" "$DOCTEST_DIR"; do
     if [ -d "$dir" ]; then
         log "   ✓ $dir"
         ((DIRS_EXIST++))
@@ -136,7 +144,7 @@ for dir in "$SRC_DIR" "$CORE_DIR" "$PARSERS_DIR" "$TESTS_DIR" "$UNIT_TESTS_DIR";
     fi
 done
 
-if [ $DIRS_EXIST -eq 5 ]; then
+if [ $DIRS_EXIST -eq 7 ]; then
     step_pass
 else
     step_fail "Отсутствуют некоторые директории"
@@ -690,7 +698,7 @@ else
 fi
 
 # 10. Структура проекта соответствует архитектуре
-if [ -d "$SRC_DIR/core" ] && [ -d "$SRC_DIR/parsers" ] && [ -d "$TESTS_DIR/unit" ]; then
+if [ -d "$SRC_DIR/core" ] && [ -d "$SRC_DIR/parsers" ] && [ -d "$TESTS_DIR/unit" ] && [ -d "$LOGS_DIR" ]; then
     log "   ✓ Структура проекта соответствует архитектурному документу"
     ((CRITERIA_PASSED++))
 else
