@@ -3,5 +3,5 @@
 
 class DnevnikParser {
 public:
-    static void parse() {} 
+    static void parse() {}
 };

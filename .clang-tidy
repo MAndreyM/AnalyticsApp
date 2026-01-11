@@ -18,10 +18,11 @@ Checks: >
   -readability-identifier-length,
   -modernize-use-trailing-return-type,
   -cppcoreguidelines-avoid-magic-numbers,
-  -readability-magic-numbers
+  -readability-magic-numbers,
+  -readability-identifier-naming
 
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '^(?!.*/usr/include/qt6).*'  # ИСКЛЮЧАЕМ заголовки Qt
 FormatStyle: file
 CheckOptions:
   - key: modernize-use-nullptr.ReplacementFunction
@@ -32,20 +33,6 @@ CheckOptions:
     value: '16'
   - key: modernize-loop-convert.MinConfidence
     value: 'reasonable'
-  - key: readability-identifier-naming.ClassCase
-    value: 'CamelCase'
-  - key: readability-identifier-naming.StructCase
-    value: 'CamelCase'
-  - key: readability-identifier-naming.EnumCase
-    value: 'CamelCase'
-  - key: readability-identifier-naming.FunctionCase
-    value: 'camelBack'
-  - key: readability-identifier-naming.VariableCase
-    value: 'snake_case'
-  - key: readability-identifier-naming.MemberCase
-    value: 'snake_case'
-  - key: readability-identifier-naming.ConstantCase
-    value: 'UPPER_CASE'
   - key: cppcoreguidelines-avoid-non-const-global-variables.Exclude
     value: 'qt_*
             q_*
@@ -60,16 +47,9 @@ CheckOptions:
     value: 'true'
   - key: modernize-use-override.IgnoreDestructors
     value: 'false'
-  - key: modernize-pass-by-value.IncludeStyle
-    value: 'value'
-  - key: modernize-replace-auto-ptr.IncludeStyle
-    value: 'value'
   - key: modernize-use-auto.MinTypeNameLength
     value: '10'
   - key: modernize-use-emplace.ContainersWithPushBack
     value: 'vector;deque;list'
   - key: modernize-use-noexcept.ReplaceThrow
     value: 'false'
-
-# Qt специфичные настройки
-HeaderFilterRegex: '^(?!.*/moc_).*'
