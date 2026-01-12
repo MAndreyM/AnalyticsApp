@@ -6,6 +6,7 @@
 #include "../src/parsers/FileMetadata.hpp"
 #include "../src/core/SchoolSummaryView.hpp"
 #include "../src/core/Student.hpp"
+#include "../src/core/ClassData.hpp"
 
 #include <unordered_map>
 
@@ -210,3 +211,45 @@ TEST_SUITE("Student Structure") {
     }
 }
 
+TEST_SUITE("ClassData Structure") {
+    TEST_CASE("ClassData creation") {
+        ClassData classData;
+        classData.className = "10А";
+        classData.gradeNumber = 10;
+        classData.classLetter = "А";
+
+        CHECK(classData.className == "10А");
+        CHECK(classData.gradeNumber == 10);
+        CHECK(classData.getTotalStudents() == 0);
+    }
+
+    TEST_CASE("ClassData with students") {
+        ClassData classData;
+
+        Student s1, s2, s3;
+        s1.fullName = "Иванов И.И.";
+        s2.fullName = "Петров П.П.";
+        s3.fullName = "Сидоров С.С.";
+
+        classData.students = {s1, s2, s3};
+
+        CHECK(classData.getTotalStudents() == 3);
+    }
+
+    TEST_CASE("ClassData::getAnalyzedStudents()") {
+        ClassData classData;
+
+        Student s1, s2, s3;
+        classData.students = {s1, s2, s3};
+
+        SUBCASE("No zero grades") {
+            CHECK(classData.getAnalyzedStudents() == 3);
+        }
+
+        SUBCASE("Some zero grades") {
+            classData.studentsWithZero = {s1};
+            CHECK(classData.getAnalyzedStudents() == 2);
+        }
+    }
+
+}
