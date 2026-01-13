@@ -7,6 +7,7 @@
 #include "../src/core/SchoolSummaryView.hpp"
 #include "../src/core/Student.hpp"
 #include "../src/core/ClassData.hpp"
+#include "../src/core/SchoolData.hpp"
 
 #include <unordered_map>
 
@@ -252,4 +253,105 @@ TEST_SUITE("ClassData Structure") {
         }
     }
 
+}
+
+TEST_SUITE("SchoolData Structure") {
+    TEST_CASE("Empty school") {
+        SchoolData school;
+        auto grades = school.getAvailableGrades();
+        CHECK(grades.empty());
+        CHECK(school.getClasses().empty());
+    }
+    
+    TEST_CASE("Available grades calculation") {
+        SchoolData school;
+        
+        ClassData class10A;
+        class10A.gradeNumber = 10;
+        class10A.className = "10А";
+        
+        ClassData class10B;
+        class10B.gradeNumber = 10;
+        class10B.className = "10Б";
+        
+        ClassData class11A;
+        class11A.gradeNumber = 11;
+        class11A.className = "11А";
+        
+        // Используем новый метод для добавления данных
+        school.addOrUpdateClass("10А", class10A);
+        school.addOrUpdateClass("10Б", class10B);
+        school.addOrUpdateClass("11А", class11A);
+        
+        auto grades = school.getAvailableGrades();
+        CHECK(grades.size() == 2); // 10 и 11
+        CHECK(std::find(grades.begin(), grades.end(), 10) != grades.end());
+        CHECK(std::find(grades.begin(), grades.end(), 11) != grades.end());
+    }
+    
+    TEST_CASE("Get grade parallel") {
+        SchoolData school;
+        
+        ClassData class10A;
+        class10A.gradeNumber = 10;
+        class10A.className = "10А";
+        
+        ClassData class10B;
+        class10B.gradeNumber = 10;
+        class10B.className = "10Б";
+        
+        ClassData class11A;
+        class11A.gradeNumber = 11;
+        class11A.className = "11А";
+        
+        school.addOrUpdateClass("10А", class10A);
+        school.addOrUpdateClass("10Б", class10B);
+        school.addOrUpdateClass("11А", class11A);
+        
+        auto grade10Classes = school.getGradeParallel(10);
+        CHECK(grade10Classes.size() == 2);
+        
+        auto grade11Classes = school.getGradeParallel(11);
+        CHECK(grade11Classes.size() == 1);
+        
+        auto grade9Classes = school.getGradeParallel(9);
+        CHECK(grade9Classes.empty());
+    }
+
+    TEST_CASE("SchoolData::getClassesInGrade()") {
+        SchoolData schoolData;
+        
+        ClassData class10A, class10B, class11A;
+        class10A.className = "10А";
+        class10A.gradeNumber = 10;
+        class10B.className = "10Б";
+        class10B.gradeNumber = 10;
+        class11A.className = "11А";
+        class11A.gradeNumber = 11;
+
+        // Используем addOrUpdateClass вместо прямого доступа к classes
+        schoolData.addOrUpdateClass("10А", class10A);
+        schoolData.addOrUpdateClass("10Б", class10B);
+        schoolData.addOrUpdateClass("11А", class11A);
+
+        // Теперь используем существующий метод getClassesInGrade()
+        auto classNames10 = schoolData.getClassesInGrade(10);
+        CHECK(classNames10.size() == 2);
+        CHECK(std::find(classNames10.begin(), classNames10.end(), "10А") != classNames10.end());
+        CHECK(std::find(classNames10.begin(), classNames10.end(), "10Б") != classNames10.end());
+
+        auto classNames11 = schoolData.getClassesInGrade(11);
+        CHECK(classNames11.size() == 1);
+        CHECK(classNames11[0] == "11А");
+
+        auto classNames9 = schoolData.getClassesInGrade(9);
+        CHECK(classNames9.empty());
+    }
+
+    TEST_CASE("SchoolData::getSchoolSummary() placeholder") {
+        SchoolData schoolData;
+        // TODO: Заменить на реальные тесты после реализации getSchoolSummary()
+        auto summary = schoolData.getSchoolSummary();
+        CHECK(summary.totalStudents == 0); // Проверяем, что заглушка работает
+    }
 }
