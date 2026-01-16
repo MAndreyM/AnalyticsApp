@@ -22,9 +22,13 @@ double DnevnikScoreParser::parseScore(const std::string& scoreStr) {
 
     try {
         int intValue = std::stoi(normalized);
+
+        if (intValue < 0) intValue = 0;
+        if (intValue > 5000) intValue = 5000;
+
         return static_cast<double>(intValue) / 1000.0;
     } catch (const std::exception&) {
-        return 0.0;
+        return 5.0;
     }
 }
 
