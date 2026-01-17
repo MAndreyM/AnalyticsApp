@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <cmath>
+
 /**
  * @class GradeCalculator
  * @brief Калькулятор для преобразования баллов в оценки по правилам Дневник.ру
@@ -27,7 +29,24 @@ public:
      * @todo Реализовать алгоритм преобразования
      */
     static int convertScoreToGrade(double score) {
-        // Простое округление к ближайшему целому
-        return static_cast<int>(score + 0.5);
+        const double EPSILON = 1e-10;  // Очень маленькое число
+        
+        if (score <= 0.0) return 0;
+        
+        double intPart;
+        double fracPart = modf(score, &intPart);
+        
+        int result = static_cast<int>(intPart);
+        
+        // Добавляем epsilon для обработки ошибок округления
+        if (fracPart >= 0.6 - EPSILON) {
+            result += 1;
+        }
+        
+        // Ограничиваем диапазоном 2-5
+        if (result < 2) return 2;
+        if (result > 5) return 5;
+        
+        return result;
     }
 };
