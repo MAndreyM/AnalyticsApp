@@ -67,3 +67,36 @@ TEST_CASE("Округление по правилу 0.6") {
 }
 
 TEST_SUITE_END();
+
+TEST_CASE("GradeCalculator - нулевые оценки") {
+    SUBCASE("0.0 должно быть 0") {
+        CHECK(GradeCalculator::convertScoreToGrade(0.0) == 0);
+    }
+    SUBCASE("0.1 должно быть 0") {
+        CHECK(GradeCalculator::convertScoreToGrade(0.1) == 0);
+    }
+    SUBCASE("0.5 должно быть 0") {
+        CHECK(GradeCalculator::convertScoreToGrade(0.5) == 0);
+    }
+    SUBCASE("0.9 должно быть 0") {
+        CHECK(GradeCalculator::convertScoreToGrade(0.9) == 0);
+    }
+//    SUBCASE("1.0 должно быть 1?") {
+//        CHECK(GradeCalculator::convertScoreToGrade(1.0) == 1);
+//    }
+}
+
+TEST_CASE("GradeCalculator - ограничение диапазона 2-5") {
+    SUBCASE("1.0 должно быть 2 (минимум)") {
+        CHECK(GradeCalculator::convertScoreToGrade(1.0) == 2);
+    }
+    SUBCASE("1.5 должно быть 2") {
+        CHECK(GradeCalculator::convertScoreToGrade(1.5) == 2);
+    }
+    SUBCASE("5.6 должно быть 5 (максимум)") {
+        CHECK(GradeCalculator::convertScoreToGrade(5.6) == 5);
+    }
+    SUBCASE("6.0 должно быть 5") {
+        CHECK(GradeCalculator::convertScoreToGrade(6.0) == 5);
+    }
+}

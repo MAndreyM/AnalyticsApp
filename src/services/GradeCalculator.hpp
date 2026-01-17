@@ -19,7 +19,11 @@
  * - Итоговая оценка ограничена диапазоном 2-5 (кроме оценки 0)
  */
 class GradeCalculator {
-public:
+private:
+    static constexpr int MIN_GRADE = 2;
+    static constexpr int MAX_GRADE = 5;
+
+    public:
     /**
      * @brief Преобразует десятичный балл в пятибалльную оценку
      * @param score Десятичный балл от 0.0 до 5.0
@@ -31,7 +35,10 @@ public:
     static int convertScoreToGrade(double score) {
         const double EPSILON = 1e-10;  // Очень маленькое число
         
-        if (score <= 0.0) return 0;
+        // Особый случай: оценка меньше 1.0 = 0
+        if (score < 1.0) {
+            return 0;
+        } 
         
         double intPart;
         double fracPart = modf(score, &intPart);
@@ -43,9 +50,13 @@ public:
             result += 1;
         }
         
-        // Ограничиваем диапазоном 2-5
-        if (result < 2) return 2;
-        if (result > 5) return 5;
+        // Применяем ограничения
+        if (result < MIN_GRADE) {
+            return MIN_GRADE;
+        }
+        if (result > MAX_GRADE) {
+            return MAX_GRADE;
+        }
         
         return result;
     }
