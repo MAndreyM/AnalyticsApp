@@ -26,5 +26,8 @@ public:
      * @note Метод будет реализован в процессе TDD
      * @todo Реализовать алгоритм преобразования
      */
-    static int convertScoreToGrade(double score);
+    static int convertScoreToGrade(double score) {
+        // Простое округление к ближайшему целому
+        return static_cast<int>(score + 0.5);
+    }
 };
