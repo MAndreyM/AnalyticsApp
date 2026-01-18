@@ -7,6 +7,8 @@
 #pragma once
 
 #include <cmath>
+#include <string>
+#include <stdexcept>
 
 /**
  * @class GradeCalculator
@@ -23,7 +25,15 @@ private:
     static constexpr int MIN_GRADE = 2;
     static constexpr int MAX_GRADE = 5;
 
-    public:
+    static void validateScore(double score) {
+        if (score < 0.0) {
+            throw std::invalid_argument(
+                "Оценка не может быть отрицательной: " + std::to_string(score)
+            );
+        }
+    }
+
+public:
     /**
      * @brief Преобразует десятичный балл в пятибалльную оценку
      * @param score Десятичный балл от 0.0 до 5.0
@@ -33,6 +43,8 @@ private:
      * @todo Реализовать алгоритм преобразования
      */
     static int convertScoreToGrade(double score) {
+        validateScore(score);
+
         const double EPSILON = 1e-10;  // Очень маленькое число
         
         // Особый случай: оценка меньше 1.0 = 0

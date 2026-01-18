@@ -100,3 +100,22 @@ TEST_CASE("GradeCalculator - ограничение диапазона 2-5") {
         CHECK(GradeCalculator::convertScoreToGrade(6.0) == 5);
     }
 }
+
+TEST_CASE("GradeCalculator - валидация входных данных") {
+    SUBCASE("отрицательные значения должны вызывать исключение") {
+        CHECK_THROWS_AS(GradeCalculator::convertScoreToGrade(-1.0), std::invalid_argument);
+        CHECK_THROWS_AS(GradeCalculator::convertScoreToGrade(-0.1), std::invalid_argument);
+        CHECK_THROWS_AS(GradeCalculator::convertScoreToGrade(-5.0), std::invalid_argument);
+    }
+
+
+    // Проверка сообщения об ошибке
+    try {
+        GradeCalculator::convertScoreToGrade(-2.5);
+        FAIL("Должно было быть выброшено исключение");
+    } catch (const std::invalid_argument& e) {
+        std::string message = e.what();
+        CHECK(message.find("отрицательной") != std::string::npos);
+        CHECK(message.find("-2.5") != std::string::npos);
+    }
+}
