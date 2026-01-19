@@ -26,7 +26,14 @@ private:
     static constexpr double ROUNDUP_THRESHOLD = 0.6;
     static constexpr int MIN_GRADE = 2;
     static constexpr int MAX_GRADE = 5;
+    static constexpr int ZERO_GRADE = 0;
 
+    /**
+     * @brief Валидирует входной балл
+     * 
+     * @param score Проверяемый балл
+     * @throws std::invalid_argument Если балл отрицательный
+     */
     static void validateScore(double score) {
         if (score < 0.0) {
             throw std::invalid_argument(
@@ -35,6 +42,26 @@ private:
         }
     }
 
+    /**
+     * @brief Применяет ограничения к оценке
+     * 
+     * @param grade Оценка до применения ограничений
+     * @return int Оценка в диапазоне MIN_GRADE-MAX_GRADE
+     */
+    static int applyGradeLimits(int grade) {
+        // Ограничение снизу: минимальная оценка 2
+        if (grade < MIN_GRADE) {
+            return MIN_GRADE;
+        }
+        
+        // Ограничение сверху: максимальная оценка 5
+        if (grade > MAX_GRADE) {
+            return MAX_GRADE;
+        }
+        
+        return grade;
+
+    }
 public:
     /**
      * @brief Проверяет, нужно ли округлять в большую сторону
@@ -48,6 +75,7 @@ public:
 
         return fractionalPart >= 0.6 - EPSILON;
     }
+
     /**
      * @brief Преобразует десятичный балл в пятибалльную оценку
      * @param score Десятичный балл от 0.0 до 5.0
@@ -57,33 +85,28 @@ public:
      * @todo Реализовать алгоритм преобразования
      */
     static int convertScoreToGrade(double score) {
+        // 1. Валидация входных данных
         validateScore(score);
 
-        const double EPSILON = 1e-10;  // Очень маленькое число
+//        const double EPSILON = 1e-10;  // Очень маленькое число
         
-        // Особый случай: оценка меньше 1.0 = 0
+        // 2. Специальный случай: оценка 0
+        // В Дневник.ру 0 означает отсутствие оценки
         if (score < 1.0) {
-            return 0;
+            return ZERO_GRADE;
         } 
         
+        // 3. Разделение на целую и дробную части
         double intPart;
         double fracPart = modf(score, &intPart);
         
-        int result = static_cast<int>(intPart);
-        
-        // Добавляем epsilon для обработки ошибок округления
-        if (fracPart >= 0.6 - EPSILON) {
-            result += 1;
+        // 4. Определение округленной оценки
+        int grade = static_cast<int>(intPart);
+        if (shouldRoundUp(fracPart)) {
+            grade += 1;
         }
         
-        // Применяем ограничения
-        if (result < MIN_GRADE) {
-            return MIN_GRADE;
-        }
-        if (result > MAX_GRADE) {
-            return MAX_GRADE;
-        }
-        
-        return result;
+        // 5. Применение ограничений диапазона
+        return applyGradeLimits(grade);
     }
 };
