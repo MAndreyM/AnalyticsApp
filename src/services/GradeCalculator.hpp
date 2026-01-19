@@ -22,6 +22,8 @@
  */
 class GradeCalculator {
 private:
+    // Константы для правил округления
+    static constexpr double ROUNDUP_THRESHOLD = 0.6;
     static constexpr int MIN_GRADE = 2;
     static constexpr int MAX_GRADE = 5;
 
@@ -34,6 +36,18 @@ private:
     }
 
 public:
+    /**
+     * @brief Проверяет, нужно ли округлять в большую сторону
+     * 
+     * @param fractionalPart Дробная часть балла (0.0 - 0.999...)
+     * @return true если дробная часть ≥ 0.6
+     * @return false если дробная часть < 0.6
+     */
+    static bool shouldRoundUp(double fractionalPart) {
+        const double EPSILON = 1e-10;  // Очень маленькое число
+
+        return fractionalPart >= 0.6 - EPSILON;
+    }
     /**
      * @brief Преобразует десятичный балл в пятибалльную оценку
      * @param score Десятичный балл от 0.0 до 5.0

@@ -119,3 +119,16 @@ TEST_CASE("GradeCalculator - валидация входных данных") {
         CHECK(message.find("-2.5") != std::string::npos);
     }
 }
+
+TEST_CASE("GradeCalculator - вспомогательный метод shouldRoundUp") {
+    SUBCASE("дробная часть 0.6 и больше - true") {
+        CHECK(GradeCalculator::shouldRoundUp(0.6) == true);
+        CHECK(GradeCalculator::shouldRoundUp(0.7) == true);
+        CHECK(GradeCalculator::shouldRoundUp(0.99) == true);
+    }
+    SUBCASE("дробная часть меньше 0.6 - false") {
+        CHECK(GradeCalculator::shouldRoundUp(0.0) == true);  // Ой, баг!
+        CHECK(GradeCalculator::shouldRoundUp(0.5) == false);
+        CHECK(GradeCalculator::shouldRoundUp(0.59) == false);
+    }
+}
