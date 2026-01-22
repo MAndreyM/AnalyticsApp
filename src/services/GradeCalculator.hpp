@@ -11,14 +11,22 @@
 #include <stdexcept>
 
 /**
- * @class GradeCalculator
  * @brief Калькулятор для преобразования баллов в оценки по правилам Дневник.ру
  * 
- * Правила преобразования (будут реализованы в следующих итерациях TDD):
+ * @class GradeCalculator
+ * 
+ * Правила преобразования:
  * - Дробная часть ≥ 0.6 → округление в большую сторону
  * - Дробная часть < 0.6 → округление в меньшую сторону
  * - Оценка 0 остаётся 0 (отсутствие оценки)
  * - Итоговая оценка ограничена диапазоном 2-5 (кроме оценки 0)
+ * 
+ * Примеры:
+ * - 3.6 → 4, 3.75 → 4, 4.55 → 4 (округление в большую сторону от 0.6)
+ * - 3.4 → 3, 4.59 → 4, 2.3 → 2 (округление в меньшую сторону до 0.6)
+ * - 0.0 → 0, 0.5 → 0 (особый случай - отсутствие оценки)
+ * - 1.0 → 2, 1.5 → 2 (минимальная оценка 2)
+ * - 5.6 → 5, 6.0 → 5 (максимальная оценка 5)
  */
 class GradeCalculator {
 
@@ -29,31 +37,47 @@ public:
      * @param fractionalPart Дробная часть балла (0.0 - 0.999...)
      * @return true если дробная часть ≥ 0.6
      * @return false если дробная часть < 0.6
+     * 
+     * @note Использует порог 0.6 с учетом машинной точности
+     * @see convertScoreToGrade()
      */
     static bool shouldRoundUp(double fractionalPart);
 
     /**
      * @brief Преобразует десятичный балл в пятибалльную оценку
+     * 
      * @param score Десятичный балл от 0.0 до 5.0
      * @return int Оценка: 0 или от 2 до 5
+     * @throws std::invalid_argument Если балл отрицательный
      * 
-     * @note Метод будет реализован в процессе TDD
-     * @todo Реализовать алгоритм преобразования
+     * @note Алгоритм преобразования:
+     * 1. Валидация входных данных
+     * 2. Проверка на 0 (отсутствие оценки)
+     * 3. Разделение на целую и дробную части
+     * 4. Применение правил округления
+     * 5. Ограничение оценки в диапазоне 2-5
+     * 
+     * @see shouldRoundUp()
+     * @see applyGradeLimits()
+     * @see validateScore()
      */
     static int convertScoreToGrade(double score);
 
 private:
     // Константы для правил округления
-    static constexpr double ROUNDUP_THRESHOLD = 0.6;
-    static constexpr int MIN_GRADE = 2;
-    static constexpr int MAX_GRADE = 5;
-    static constexpr int ZERO_GRADE = 0;
+    static constexpr double ROUNDUP_THRESHOLD = 0.6; /**< Порог округления в большую сторону */
+    static constexpr int MIN_GRADE = 2;              /**< Минимальная оценка (кроме 0) */
+    static constexpr int MAX_GRADE = 5;              /**< Максимальная оценка */
+    static constexpr int ZERO_GRADE = 0;             /**< Специальное значение для отсутствия оценки */
 
     /**
      * @brief Валидирует входной балл
      * 
      * @param score Проверяемый балл
      * @throws std::invalid_argument Если балл отрицательный
+     * 
+     * @note Проверяет только отрицательные значения. Значения больше 5.0
+     *       корректируются в методе applyGradeLimits()
      */
     static void validateScore(double score);
 
@@ -62,6 +86,9 @@ private:
      * 
      * @param grade Оценка до применения ограничений
      * @return int Оценка в диапазоне MIN_GRADE-MAX_GRADE
+     * 
+     * @note Если оценка < MIN_GRADE, возвращается MIN_GRADE
+     * @note Если оценка > MAX_GRADE, возвращается MAX_GRADE
      */
     static int applyGradeLimits(int grade);
 };
