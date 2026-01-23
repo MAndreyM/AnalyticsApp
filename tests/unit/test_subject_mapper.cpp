@@ -13,4 +13,9 @@ TEST_SUITE("SubjectMapper") {
         SubjectMapper mapper;
         CHECK(mapper.getFullName("") == "");
     }
+
+    TEST_CASE("Базовый маппинг - Алгебра") {
+        SubjectMapper mapper;
+        CHECK(mapper.getFullName("Алгеб") == "Алгебра");
+    }
 }
