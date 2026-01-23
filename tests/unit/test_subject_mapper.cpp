@@ -18,4 +18,9 @@ TEST_SUITE("SubjectMapper") {
         SubjectMapper mapper;
         CHECK(mapper.getFullName("Алгеб") == "Алгебра");
     }
+
+    TEST_CASE("Неизвестное сокращение возвращается как есть") {
+        SubjectMapper mapper;
+        CHECK(mapper.getFullName("Неизвестный") == "Неизвестный");
+    }
 }
