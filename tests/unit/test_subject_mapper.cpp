@@ -59,4 +59,14 @@ TEST_SUITE("SubjectMapper") {
         CHECK(mapper.contains("НовП") == true);
         CHECK(mapper.getFullName("НовП") == "Новый предмет");
     }
+
+    TEST_CASE("Пустые строки не добавляются") {
+        SubjectMapper mapper;
+        size_t originalSize = mapper.size();
+
+        mapper.addMapping("", "Пустое сокращение");
+        mapper.addMapping("Сокр", "");
+
+        CHECK(mapper.size() == originalSize); // Размер не изменился
+    }
 }
