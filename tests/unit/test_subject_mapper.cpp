@@ -35,4 +35,12 @@ TEST_SUITE("SubjectMapper") {
         CHECK(mapper.contains("Неизвестный") == false);
         CHECK(mapper.contains("") == false);
     }
+
+    TEST_CASE("Обрезка пробелов в начале и конце") {
+        SubjectMapper mapper;
+
+        CHECK(mapper.getFullName("  Алгеб  ") == "Алгебра");
+        CHECK(mapper.getFullName("\tРусск\n") == "Русский язык");
+        CHECK(mapper.contains("  Матем  ") == true);
+    }
 }

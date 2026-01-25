@@ -18,17 +18,28 @@ std::string SubjectMapper::getFullName(const std::string& shortName) const {
         return "";
     }
 
-    auto it = subjectMap.find(shortName);
+    // Обрезаем пробелы
+    std::string trimmed = shortName;
+    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
+    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
+
+    auto it = subjectMap.find(trimmed);
     if (it != subjectMap.end()) {
         return it->second;
     }
 
-    return shortName;
+    return shortName; // Возвращаем оригинал, не trimmed
 }
 
 bool SubjectMapper::contains(const std::string& shortName) const {
     if (shortName.empty()) {
         return false;
     }
-    return subjectMap.find(shortName) != subjectMap.end();
+
+    // Обрезаем пробелы для поиска
+    std::string trimmed = shortName;
+    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
+    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
+
+    return !trimmed.empty() && subjectMap.find(trimmed) != subjectMap.end();
 }
