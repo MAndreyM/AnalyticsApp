@@ -26,4 +26,13 @@ TEST_SUITE("SubjectMapper") {
         SubjectMapper mapper;
         CHECK(mapper.getFullName("Неизвестный") == "Неизвестный");
     }
+
+    TEST_CASE("Метод contains проверяет наличие") {
+        SubjectMapper mapper;
+
+        CHECK(mapper.contains("Алгеб") == true);
+        CHECK(mapper.contains("Матем") == true);
+        CHECK(mapper.contains("Неизвестный") == false);
+        CHECK(mapper.contains("") == false);
+    }
 }

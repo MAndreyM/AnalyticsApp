@@ -25,3 +25,10 @@ std::string SubjectMapper::getFullName(const std::string& shortName) const {
 
     return shortName;
 }
+
+bool SubjectMapper::contains(const std::string& shortName) const {
+    if (shortName.empty()) {
+        return false;
+    }
+    return subjectMap.find(shortName) != subjectMap.end();
+}
