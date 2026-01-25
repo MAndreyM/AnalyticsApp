@@ -2,6 +2,8 @@
 
 #include <unordered_map>
 #include <string>
+#include <algorithm>
+#include <vector>
 
 void SubjectMapper::initializeMap() {
     subjectMap["Алгеб"] = "Алгебра";
@@ -52,4 +54,16 @@ void SubjectMapper::addMapping(const std::string& shortName, const std::string& 
     if (!shortName.empty() && !fullName.empty()) {
         subjectMap[shortName] = fullName;
     }
+}
+
+std::vector<std::string> SubjectMapper::getAllShortNames() const {
+    std::vector<std::string> result;
+    result.reserve(subjectMap.size());
+
+    for (const auto& pair : subjectMap) {
+        result.push_back(pair.first);
+    }
+
+    std::sort(result.begin(), result.end());
+    return result;
 }

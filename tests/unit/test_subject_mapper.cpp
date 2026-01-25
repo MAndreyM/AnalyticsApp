@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "../../src/parsers/SubjectMapper.hpp"
+#include <algorithm>
 
 TEST_SUITE("SubjectMapper") {
     TEST_CASE("Конструктор создает объект") {
@@ -77,5 +78,16 @@ TEST_SUITE("SubjectMapper") {
 
         CHECK(mapper.getFullName("Алгеб") == "Обновленная Алгебра");
         CHECK(mapper.size() == 3); // Размер не изменился
+    }
+
+    TEST_CASE("Получение всех сокращений") {
+        SubjectMapper mapper;
+
+        auto shortNames = mapper.getAllShortNames();
+
+        CHECK(shortNames.size() == 3);
+        CHECK(std::find(shortNames.begin(), shortNames.end(), "Алгеб") != shortNames.end());
+        CHECK(std::find(shortNames.begin(), shortNames.end(), "Матем") != shortNames.end());
+        CHECK(std::find(shortNames.begin(), shortNames.end(), "Русск") != shortNames.end());
     }
 }
