@@ -90,4 +90,17 @@ TEST_SUITE("SubjectMapper") {
         CHECK(std::find(shortNames.begin(), shortNames.end(), "Матем") != shortNames.end());
         CHECK(std::find(shortNames.begin(), shortNames.end(), "Русск") != shortNames.end());
     }
+
+    TEST_CASE("Очистка словаря") {
+        SubjectMapper mapper;
+
+        CHECK(mapper.size() > 0);
+
+        mapper.clear();
+
+        CHECK(mapper.size() == 0);
+        CHECK(mapper.getAllShortNames().empty() == true);
+        CHECK(mapper.getFullName("Алгеб") == "Алгеб"); // Возвращает оригинал
+        CHECK(mapper.contains("Русск") == false);
+    }
 }

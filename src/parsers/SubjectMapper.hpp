@@ -12,6 +12,7 @@ public:
     size_t size() const;
     void addMapping(const std::string& shortName, const std::string& fullName);
     std::vector<std::string> getAllShortNames() const;
+    void clear();
 
 private:
     std::unordered_map<std::string, std::string> subjectMap;

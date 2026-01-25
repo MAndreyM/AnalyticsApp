@@ -67,3 +67,7 @@ std::vector<std::string> SubjectMapper::getAllShortNames() const {
     std::sort(result.begin(), result.end());
     return result;
 }
+
+void SubjectMapper::clear() {
+    subjectMap.clear();
+}
