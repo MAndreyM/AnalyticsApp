@@ -47,3 +47,9 @@ bool SubjectMapper::contains(const std::string& shortName) const {
 size_t SubjectMapper::size() const {
     return subjectMap.size();
 }
+
+void SubjectMapper::addMapping(const std::string& shortName, const std::string& fullName) {
+    if (!shortName.empty() && !fullName.empty()) {
+        subjectMap[shortName] = fullName;
+    }
+}

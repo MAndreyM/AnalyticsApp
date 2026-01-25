@@ -48,4 +48,15 @@ TEST_SUITE("SubjectMapper") {
         SubjectMapper mapper;
         CHECK(mapper.size() == 3); // Три предмета добавлено
     }
+
+    TEST_CASE("Добавление нового маппинга") {
+        SubjectMapper mapper;
+        size_t originalSize = mapper.size();
+
+        mapper.addMapping("НовП", "Новый предмет");
+
+        CHECK(mapper.size() == originalSize + 1);
+        CHECK(mapper.contains("НовП") == true);
+        CHECK(mapper.getFullName("НовП") == "Новый предмет");
+    }
 }
