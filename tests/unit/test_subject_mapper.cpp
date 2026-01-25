@@ -69,4 +69,13 @@ TEST_SUITE("SubjectMapper") {
 
         CHECK(mapper.size() == originalSize); // Размер не изменился
     }
+
+    TEST_CASE("Обновление существующего маппинга") {
+        SubjectMapper mapper;
+
+        mapper.addMapping("Алгеб", "Обновленная Алгебра");
+
+        CHECK(mapper.getFullName("Алгеб") == "Обновленная Алгебра");
+        CHECK(mapper.size() == 3); // Размер не изменился
+    }
 }
