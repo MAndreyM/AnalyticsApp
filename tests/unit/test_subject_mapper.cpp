@@ -43,4 +43,9 @@ TEST_SUITE("SubjectMapper") {
         CHECK(mapper.getFullName("\tРусск\n") == "Русский язык");
         CHECK(mapper.contains("  Матем  ") == true);
     }
+
+    TEST_CASE("Размер словаря корректный") {
+        SubjectMapper mapper;
+        CHECK(mapper.size() == 3); // Три предмета добавлено
+    }
 }

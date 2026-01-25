@@ -43,3 +43,7 @@ bool SubjectMapper::contains(const std::string& shortName) const {
 
     return !trimmed.empty() && subjectMap.find(trimmed) != subjectMap.end();
 }
+
+size_t SubjectMapper::size() const {
+    return subjectMap.size();
+}
