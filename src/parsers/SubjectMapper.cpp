@@ -5,6 +5,8 @@
 
 void SubjectMapper::initializeMap() {
     subjectMap["Алгеб"] = "Алгебра";
+    subjectMap["Матем"] = "Математика";
+    subjectMap["Русск"] = "Русский язык";
 }
 
 SubjectMapper::SubjectMapper() {

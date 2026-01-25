@@ -14,9 +14,12 @@ TEST_SUITE("SubjectMapper") {
         CHECK(mapper.getFullName("") == "");
     }
 
-    TEST_CASE("Базовый маппинг - Алгебра") {
+    TEST_CASE("Маппинг нескольких предметов") {
         SubjectMapper mapper;
+
         CHECK(mapper.getFullName("Алгеб") == "Алгебра");
+        CHECK(mapper.getFullName("Матем") == "Математика");
+        CHECK(mapper.getFullName("Русск") == "Русский язык");
     }
 
     TEST_CASE("Неизвестное сокращение возвращается как есть") {
