@@ -99,9 +99,11 @@ std::string SubjectMapper::getFullName(const std::string& shortName) const {
     }
 
     // Обрезаем пробелы
-    std::string trimmed = shortName;
-    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
-    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
+//    std::string trimmed = shortName;
+//    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
+//    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
+
+    std::string trimmed = trim(shortName);
 
     auto it = subjectMap.find(trimmed);
     if (it != subjectMap.end()) {
@@ -117,9 +119,11 @@ bool SubjectMapper::contains(const std::string& shortName) const {
     }
 
     // Обрезаем пробелы для поиска
-    std::string trimmed = shortName;
-    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
-    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
+//    std::string trimmed = shortName;
+//    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
+//    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
+
+    std::string trimmed = trim(shortName);
 
     return !trimmed.empty() && subjectMap.find(trimmed) != subjectMap.end();
 }
@@ -148,4 +152,16 @@ std::vector<std::string> SubjectMapper::getAllShortNames() const {
 
 void SubjectMapper::clear() {
     subjectMap.clear();
+}
+
+std::string SubjectMapper::trim(const std::string& str) {
+    const char* whitespace = " \t\n\r\f\v";
+    
+    size_t start = str.find_first_not_of(whitespace);
+    if (start == std::string::npos) {
+        return "";
+    }
+    
+    size_t end = str.find_last_not_of(whitespace);
+    return str.substr(start, end - start + 1);
 }

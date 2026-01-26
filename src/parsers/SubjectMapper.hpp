@@ -17,4 +17,5 @@ public:
 private:
     std::unordered_map<std::string, std::string> subjectMap;
     void initializeMap();
+    static std::string trim(const std::string& str);
 };
