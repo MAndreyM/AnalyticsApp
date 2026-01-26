@@ -5,6 +5,19 @@
 #include <algorithm>
 #include <vector>
 
+/**
+ * @brief Инициализирует словарь стандартными соответствиями сокращений полным названиям.
+ * 
+ * Заполняет subjectMap предопределенными значениями для школьных предметов.
+ * Включает основные категории:
+ * - Математические дисциплины (Алгебра, Геометрия и др.)
+ * - Филологические дисциплины (языки и литература)
+ * - Естественные науки (Физика, Химия, Биология и др.)
+ * - Гуманитарные дисциплины (История, Обществознание и др.)
+ * - Технические дисциплины (Информатика, Технология и др.)
+ * - Физкультура и искусство
+ * - Специальные курсы и дополнительные предметы
+ */
 void SubjectMapper::initializeMap() {
     // Основные школьные предметы
     subjectMap = {
@@ -79,6 +92,7 @@ void SubjectMapper::initializeMap() {
     };
 
     // Добавляем также варианты с точками (если они встречаются)
+    // Это нужно для обработки вариантов написания с точкой в конце
     subjectMap["Алгеб."] = "Алгебра";
     subjectMap["Геоме."] = "Геометрия";
     subjectMap["Матем."] = "Математика";
@@ -89,79 +103,148 @@ void SubjectMapper::initializeMap() {
     subjectMap["Истори"] = "История";
 }
 
+/**
+ * @brief Конструктор класса SubjectMapper.
+ * 
+ * Создает объект и инициализирует словарь соответствий.
+ */
 SubjectMapper::SubjectMapper() {
     initializeMap();
 }
 
+/**
+ * @brief Получает полное название предмета по сокращенному.
+ * 
+ * @param shortName Сокращенное название предмета для поиска.
+ * @return Полное название предмета. Если сокращение не найдено в словаре,
+ *         возвращает исходную строку (после удаления пробелов).
+ * 
+ * Алгоритм:
+ * 1. Проверка на пустую строку
+ * 2. Удаление пробельных символов с начала и конца
+ * 3. Поиск в словаре по обработанной строке
+ * 4. Возврат результата или исходной строки, если не найдено
+ */
 std::string SubjectMapper::getFullName(const std::string& shortName) const {
     if (shortName.empty()) {
         return "";
     }
 
-    // Обрезаем пробелы
-//    std::string trimmed = shortName;
-//    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
-//    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
-
+    // Удаляем пробелы с начала и конца строки для более точного поиска
     std::string trimmed = trim(shortName);
 
+    // Ищем сокращение в словаре
     auto it = subjectMap.find(trimmed);
     if (it != subjectMap.end()) {
-        return it->second;
+        return it->second;  // Возвращаем полное название
     }
 
-    return shortName; // Возвращаем оригинал, не trimmed
+    // Если не нашли, возвращаем исходное (не обработанное) название
+    // Это важно, чтобы сохранить оригинальное форматирование
+    return shortName;
 }
 
+/**
+ * @brief Проверяет наличие сокращения в словаре.
+ * 
+ * @param shortName Сокращенное название для проверки.
+ * @return true если сокращение найдено, false в противном случае.
+ * 
+ * Перед поиском удаляет пробельные символы с начала и конца строки.
+ */
 bool SubjectMapper::contains(const std::string& shortName) const {
     if (shortName.empty()) {
         return false;
     }
 
-    // Обрезаем пробелы для поиска
-//    std::string trimmed = shortName;
-//    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r\f\v"));
-//    trimmed.erase(trimmed.find_last_not_of(" \t\n\r\f\v") + 1);
-
+    // Обрабатываем строку для поиска
     std::string trimmed = trim(shortName);
 
+    // Проверяем, что строка не пустая и есть в словаре
     return !trimmed.empty() && subjectMap.find(trimmed) != subjectMap.end();
 }
 
+/**
+ * @brief Возвращает количество соответствий в словаре.
+ * 
+ * @return Размер словаря subjectMap.
+ */
 size_t SubjectMapper::size() const {
     return subjectMap.size();
 }
 
+/**
+ * @brief Добавляет новое соответствие в словарь.
+ * 
+ * @param shortName Сокращенное название предмета.
+ * @param fullName Полное название предмета.
+ * 
+ * Если оба параметра не пустые, добавляет пару в словарь.
+ * Можно использовать для расширения стандартного набора соответствий.
+ */
 void SubjectMapper::addMapping(const std::string& shortName, const std::string& fullName) {
     if (!shortName.empty() && !fullName.empty()) {
         subjectMap[shortName] = fullName;
     }
 }
 
+/**
+ * @brief Получает список всех сокращенных названий из словаря.
+ * 
+ * @return Вектор строк, содержащий все сокращения в алфавитном порядке.
+ * 
+ * Полезно для отладки или отображения доступных предметов в интерфейсе.
+ */
 std::vector<std::string> SubjectMapper::getAllShortNames() const {
     std::vector<std::string> result;
     result.reserve(subjectMap.size());
 
+    // Копируем все ключи (сокращения) в вектор
     for (const auto& pair : subjectMap) {
         result.push_back(pair.first);
     }
 
+    // Сортируем для удобства использования
     std::sort(result.begin(), result.end());
     return result;
 }
 
+/**
+ * @brief Очищает словарь соответствий.
+ * 
+ * Удаляет все сохраненные соответствия. После вызова этого метода
+ * необходимо повторно инициализировать словарь перед использованием.
+ */
 void SubjectMapper::clear() {
     subjectMap.clear();
 }
 
+/**
+ * @brief Удаляет пробельные символы с начала и конца строки.
+ * 
+ * @param str Исходная строка.
+ * @return Строка без пробельных символов по краям.
+ * 
+ * Удаляет стандартные пробельные символы:
+ * - пробел (' ')
+ * - табуляция ('\t')
+ * - новая строка ('\n')
+ * - возврат каретки ('\r')
+ * - перевод страницы ('\f')
+ * - вертикальная табуляция ('\v')
+ */
 std::string SubjectMapper::trim(const std::string& str) {
     const char* whitespace = " \t\n\r\f\v";
     
+    // Находим первый непробельный символ
     size_t start = str.find_first_not_of(whitespace);
     if (start == std::string::npos) {
-        return "";
+        return "";  // Строка состоит только из пробелов
     }
     
+    // Находим последний непробельный символ
     size_t end = str.find_last_not_of(whitespace);
+    
+    // Возвращаем подстроку без пробелов по краям
     return str.substr(start, end - start + 1);
 }
