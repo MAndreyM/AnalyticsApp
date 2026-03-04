@@ -13,14 +13,20 @@
  * Содержит полную информацию об ученике: ФИО, оценки по предметам,
  * категорию успеваемости и флаги для анализа.
  */
-struct Student {
-    std::string fullName;                            ///< Полное имя ученика
+class Student {
+private:
     std::string className;                          ///< Название класса ученика
+    std::string fullName;                            ///< Полное имя ученика
     std::unordered_map<std::string, double> subjectScores; ///< Исходные баллы по предметам (0-5.0)
     std::unordered_map<std::string, int> subjectGrades;    ///< Итоговые оценки по предметам (0,2-5)
     StudentCategory category;                       ///< Категория ученика по успеваемости
     bool hasZeroGrade;                              ///< Флаг наличия оценки 0
     bool isExcluded;                                ///< Флаг исключения из анализа
+
+public:
+    // Конструкторы
+    Student();
+    Student(const std::string& className, const std::string& fullName);
 
     /**
      * @brief Проверяет наличие двоек у ученика

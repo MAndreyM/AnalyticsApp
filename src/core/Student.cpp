@@ -1,6 +1,19 @@
 #include "Student.hpp"
 #include <algorithm>
 
+// Конструкторы
+Student::Student() 
+    : category(StudentCategory::REGULAR), 
+      hasZeroGrade(false), 
+      isExcluded(false) {}
+
+Student::Student(const std::string& className, const std::string& fullName)
+    : className(className), 
+      fullName(fullName), 
+      category(StudentCategory::REGULAR), 
+      hasZeroGrade(false), 
+      isExcluded(false) {}
+      
 /**
  * @brief Проверяет, есть ли у ученика хотя бы одна двойка (оценка 2)
  * 
